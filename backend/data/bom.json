@@ -1,0 +1,10 @@
+{
+  "bom_id": "98765",
+  "product_name": "Smart Sensor",
+  "parts": [
+    { "part_number": "P-2001", "material": "Copper", "weight_g": 20 },
+    { "part_number": "P-2002", "material": "Plastic", "weight_g": 10 }
+  ]
+}
+
+
