@@ -6,6 +6,7 @@ import http from "http";
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 import { getBom, getDocuments, getMerged, postBom } from "./controllers/apiController";
+import { validateBomData, validateLogin } from "./middleware/validation";
 import logger from "./utils/logger";
 
 const app = express();
@@ -18,8 +19,8 @@ const JWT_SECRET = process.env.JWT_SECRET || "demo-secret";
 const DEMO_USER = process.env.DEMO_USER || "admin";
 const DEMO_PASS = process.env.DEMO_PASS || "password";
 
-app.post("/auth/login", (req, res) => {
-  const { username, password } = req.body || {};
+app.post("/auth/login", validateLogin, (req, res) => {
+  const { username, password } = req.body;
   if (username === DEMO_USER && password === DEMO_PASS) {
     const token = jwt.sign({ sub: username }, JWT_SECRET, { expiresIn: "2h" });
     return res.json({ token });
@@ -45,7 +46,7 @@ app.get("/health", (_req, res) => res.json({ ok: true }));
 app.get("/bom", authenticate, getBom);
 app.get("/documents", authenticate, getDocuments);
 app.get("/merged", authenticate, getMerged);
-app.post("/bom", authenticate, postBom);
+app.post("/bom", authenticate, validateBomData, postBom);
 
 // Error handling
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

@@ -34,11 +34,8 @@ export async function getMerged(req: Request, res: Response, next: NextFunction)
 
 export async function postBom(req: Request, res: Response, next: NextFunction) {
   try {
-    const body = req.body as Partial<BomData>;
-    if (!body || !body.bom_id || !body.product_name || !Array.isArray(body.parts)) {
-      return res.status(400).json({ message: "Invalid BOM payload" });
-    }
-    await writeBomJson(body as BomData);
+    const body = req.body as BomData; // Already validated by middleware
+    await writeBomJson(body);
     logger.info("BOM updated via POST /bom");
     // Notify via websocket if available
     const io = req.app.get("io");

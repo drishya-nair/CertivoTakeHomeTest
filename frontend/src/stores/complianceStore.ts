@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { api, setAuthToken, MergedResponse, API_BASE } from "@/utils/api";
+import { api, setAuthToken, API_BASE } from "@/utils/api";
+import type { MergedResponse } from "@/types";
 import { createSocket } from "@/utils/socket";
 
 type State = {

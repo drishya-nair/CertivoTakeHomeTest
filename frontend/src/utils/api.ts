@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { MergedComponent, MergedResponse } from "@/types";
 
 // Point frontend requests to Next.js rewrite proxy. Backend URL is configured in next.config.ts
 export const API_BASE = "/api";
@@ -12,18 +13,7 @@ export function setAuthToken(token?: string) {
   else delete api.defaults.headers.common["Authorization"];
 }
 
-export interface MergedComponent {
-  id: string;
-  substance: string | null;
-  mass: string;
-  threshold_ppm: number | null;
-  status: "Compliant" | "Non-Compliant" | "Unknown";
-  material: string;
-}
-
-export interface MergedResponse {
-  product: string;
-  components: MergedComponent[];
-}
+// Re-export types for convenience
+export type { MergedComponent, MergedResponse };
 
 
