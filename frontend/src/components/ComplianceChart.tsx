@@ -14,32 +14,39 @@ export default function ComplianceChart({ compliant, non, unknown }: Props) {
 
   useEffect(() => {
     if (!ref.current) return;
-    if (chartRef.current) {
-      chartRef.current.destroy();
-      chartRef.current = null;
-    }
     const ctx = ref.current.getContext("2d");
     if (!ctx) return;
-    chartRef.current = new Chart(ctx, {
-      type: "doughnut",
-      data: {
-        labels: ["Compliant", "Non-Compliant", "Unknown"],
-        datasets: [
-          {
-            data: [compliant, non, unknown],
-            backgroundColor: ["#22c55e", "#ef4444", "#9ca3af"],
-            borderWidth: 0,
-          },
-        ],
-      },
-      options: {
-        plugins: {
-          legend: { position: "bottom" as const, labels: { boxWidth: 12 } },
+
+    if (!chartRef.current) {
+      chartRef.current = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: ["Compliant", "Non-Compliant", "Unknown"],
+          datasets: [
+            {
+              data: [compliant, non, unknown],
+              backgroundColor: ["#22c55e", "#ef4444", "#9ca3af"],
+              borderWidth: 0,
+            },
+          ],
         },
-      },
-    });
+        options: {
+          plugins: {
+            legend: { position: "bottom", labels: { boxWidth: 12 } },
+          },
+        },
+      });
+    } else {
+      const dataset = chartRef.current.data.datasets[0];
+      dataset.data = [compliant, non, unknown];
+      chartRef.current.update();
+    }
+
     return () => {
-      if (chartRef.current) chartRef.current.destroy();
+      if (chartRef.current) {
+        chartRef.current.destroy();
+        chartRef.current = null;
+      }
     };
   }, [compliant, non, unknown]);
 

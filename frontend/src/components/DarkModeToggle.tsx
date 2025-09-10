@@ -1,27 +1,24 @@
 "use client";
+import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
 export default function DarkModeToggle() {
-  const [dark, setDark] = useState(false);
-  
+  const { theme, resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
-    const stored = localStorage.getItem("theme:dark");
-    const initial = stored === "true";
-    setDark(initial);
-    document.documentElement.classList.toggle("dark", initial);
+    setMounted(true);
   }, []);
-  
+
+  const isDark = mounted && ((theme === "dark") || (theme === "system" && resolvedTheme === "dark"));
+
   return (
     <button
       className="rounded border px-3 py-1 text-sm border-gray-300 dark:border-neutral-800"
-      onClick={() => {
-        const next = !dark;
-        setDark(next);
-        localStorage.setItem("theme:dark", String(next));
-        document.documentElement.classList.toggle("dark", next);
-      }}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      aria-label="Toggle dark mode"
     >
-      {dark ? "Light" : "Dark"} Mode
+      {mounted ? (isDark ? "Light" : "Dark") : "Theme"} Mode
     </button>
   );
 }

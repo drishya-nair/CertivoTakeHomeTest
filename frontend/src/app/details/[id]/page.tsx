@@ -7,17 +7,22 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 export default function DetailsPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { merged, fetchMerged } = useComplianceStore();
+  const { token, merged, loading, fetchMerged, login } = useComplianceStore();
 
   useEffect(() => {
-    if (!merged) fetchMerged();
-  }, [merged, fetchMerged]);
+    (async () => {
+      if (!token) {
+        await login(process.env.NEXT_PUBLIC_DEMO_USER || "admin", process.env.NEXT_PUBLIC_DEMO_PASS || "password");
+      }
+      if (!merged) await fetchMerged();
+    })();
+  }, [token, merged, login, fetchMerged]);
 
   const component = merged?.components.find((c) => c.id === params.id);
 
   return (
     <main className="min-h-screen p-6 md:p-10">
-      <button className="mb-4 underline" onClick={() => router.back()}>
+      <button className="mb-4" onClick={() => router.back()}>
         ← Back
       </button>
       <ErrorBoundary>
@@ -33,8 +38,10 @@ export default function DetailsPage() {
               Compliance history is mocked in this demo.
             </div>
           </div>
-        ) : (
+        ) : loading ? (
           <div>Loading…</div>
+        ) : (
+          <div className="text-sm text-gray-600 dark:text-gray-300">Component not found.</div>
         )}
       </ErrorBoundary>
     </main>

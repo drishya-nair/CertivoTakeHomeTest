@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useComplianceStore } from "@/stores/complianceStore";
 import type { MergedComponent } from "@/types";
 import ComplianceChart from "@/components/ComplianceChart";
@@ -10,22 +10,17 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 
 export default function Home() {
   const { merged, loading, error, fetchMerged, login, filter, setFilter } = useComplianceStore();
-  const [authed, setAuthed] = useState(false);
 
   useEffect(() => {
     (async () => {
       try {
         await login(process.env.NEXT_PUBLIC_DEMO_USER || "admin", process.env.NEXT_PUBLIC_DEMO_PASS || "password");
-        setAuthed(true);
+        await fetchMerged();
       } catch (e) {
         console.error(e);
       }
     })();
-  }, [login]);
-
-  useEffect(() => {
-    if (authed) fetchMerged();
-  }, [authed, fetchMerged]);
+  }, [login, fetchMerged]);
 
   const filtered = useMemo<MergedComponent[]>(() => {
     const q = filter.trim().toLowerCase();
@@ -35,9 +30,15 @@ export default function Home() {
   }, [merged, filter]);
 
   const stats = useMemo(() => {
-    const total = merged?.components.length || 0;
-    const compliant = merged?.components.filter((c) => c.status === "Compliant").length || 0;
-    const non = merged?.components.filter((c) => c.status === "Non-Compliant").length || 0;
+    const components = merged?.components;
+    if (!components?.length) return { total: 0, compliant: 0, non: 0, unknown: 0 };
+    let compliant = 0;
+    let non = 0;
+    for (const c of components) {
+      if (c.status === "Compliant") compliant++;
+      else if (c.status === "Non-Compliant") non++;
+    }
+    const total = components.length;
     const unknown = total - compliant - non;
     return { total, compliant, non, unknown };
   }, [merged]);
