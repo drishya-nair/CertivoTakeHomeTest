@@ -3,15 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "workspaces": [
-    "backend",
-    "frontend"
+    "apps/api",
+    "apps/web",
+    "packages/shared-types"
   ],
   "scripts": {
-    "dev": "concurrently -n backend,frontend -c blue,green \"npm:dev --workspace backend\" \"npm:dev --workspace frontend\"",
-    "dev:backend": "npm run dev --workspace backend",
-    "dev:frontend": "npm run dev --workspace frontend",
-    "build": "npm -w backend run build && npm -w frontend run build",
-    "test": "npm -w backend test && npm -w frontend test"
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm:dev --workspace apps/api\" \"npm:dev --workspace apps/web\"",
+    "dev:backend": "npm run dev --workspace apps/api",
+    "dev:frontend": "npm run dev --workspace apps/web",
+    "build": "npm -w apps/api run build && npm -w apps/web run build",
+    "test": "npm -w apps/api test && npm -w apps/web test"
   },
   "devDependencies": {
     "concurrently": "^9.0.1"
