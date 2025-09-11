@@ -23,10 +23,11 @@ describe("StatusIndicator", () => {
     expect(screen.getByTitle("Unknown")).toBeInTheDocument();
   });
 
-  it("hides text when showText is false", () => {
-    render(<StatusIndicator status="Compliant" showText={false} />);
+  it("renders with different sizes", () => {
+    const { rerender } = render(<StatusIndicator status="Compliant" size="sm" />);
+    expect(screen.getByText("Compliant")).toBeInTheDocument();
     
-    expect(screen.queryByText("Compliant")).not.toBeInTheDocument();
-    expect(screen.getByTitle("Compliant")).toBeInTheDocument();
+    rerender(<StatusIndicator status="Compliant" size="lg" />);
+    expect(screen.getByText("Compliant")).toBeInTheDocument();
   });
 });

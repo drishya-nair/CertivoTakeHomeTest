@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 
 const dataDir = process.env.DATA_DIR
   ? path.resolve(process.env.DATA_DIR)
-  : path.resolve(__dirname, "..", "..", "..", "..", "data");
+  : path.resolve(__dirname, "..", "..", "data");
 const bomPath = path.join(dataDir, "bom.json");
 const complianceCsvPath = path.join(dataDir, "compliance.csv");
 const complianceJsonPath = path.join(dataDir, "compliance.json");

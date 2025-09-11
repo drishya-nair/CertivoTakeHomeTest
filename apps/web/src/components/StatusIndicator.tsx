@@ -5,58 +5,46 @@ import { MergedComponent } from "@certivo/shared-types";
 interface StatusIndicatorProps {
   status: MergedComponent["status"];
   size?: "sm" | "md" | "lg";
-  showText?: boolean;
 }
 
 export default function StatusIndicator({ 
   status, 
-  size = "md", 
-  showText = true 
+  size = "md"
 }: StatusIndicatorProps) {
   const getStatusConfig = (status: MergedComponent["status"]) => {
     switch (status) {
       case "Compliant":
         return {
           color: "bg-green-500",
-          textColor: "text-green-700 dark:text-green-400",
-          icon: "✓",
+          text: "Compliant",
         };
       case "Non-Compliant":
         return {
           color: "bg-red-500",
-          textColor: "text-red-700 dark:text-red-400",
-          icon: "✗",
+          text: "Non-Compliant",
         };
       case "Unknown":
       default:
         return {
           color: "bg-gray-500",
-          textColor: "text-gray-700 dark:text-gray-400",
-          icon: "?",
+          text: "Unknown",
         };
     }
   };
 
   const config = getStatusConfig(status);
   const sizeClasses = {
-    sm: "h-2 w-2",
-    md: "h-3 w-3",
-    lg: "h-4 w-4",
+    sm: "px-2 py-0.5 text-xs",
+    md: "px-3 py-1 text-xs",
+    lg: "px-4 py-1.5 text-sm",
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <div
-        className={`${config.color} ${sizeClasses[size]} rounded-full flex items-center justify-center text-white text-xs font-bold`}
-        title={status}
-      >
-        {size !== "sm" && config.icon}
-      </div>
-      {showText && (
-        <span className={`text-sm font-medium ${config.textColor}`}>
-          {status}
-        </span>
-      )}
+    <div
+      className={`${config.color} ${sizeClasses[size]} rounded-md text-white font-medium inline-flex items-center justify-center min-w-28`}
+      title={status}
+    >
+      {config.text}
     </div>
   );
 }

@@ -15,10 +15,7 @@
     { "part_number": "P-2011", "material": "Cobalt", "weight_g": 6 },
     { "part_number": "P-2012", "material": "Tin", "weight_g": 4 },
     { "part_number": "P-2013", "material": "Gold", "weight_g": 1 },
-    { "part_number": "P-2014", "material": "Silver", "weight_g": 2 },
-    { "part_number": "P-2015", "material": "Brass", "weight_g": 14 },
-    { "part_number": "P-2016", "material": "Polycarbonate", "weight_g": 11 },
-    { "part_number": "P-2017", "material": "ABS", "weight_g": 13 }
+    { "part_number": "P-2014", "material": "Silver", "weight_g": 2 }
   ]
 }
 
