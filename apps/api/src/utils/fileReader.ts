@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import csv from "csv-parser";
-import logger from "../middleware/logger";
+import logger from "../lib/logger";
 import { BomData, ComplianceEntry } from "@certivo/shared-types";
 import { fileURLToPath } from "url";
 import env from "../config/env";

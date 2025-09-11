@@ -11,10 +11,7 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "types": ["node", "jest"],
-    "baseUrl": ".",
-    "paths": {
-      "@certivo/shared-types": ["../../packages/shared-types/dist"]
-    }
+    "baseUrl": "."
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]

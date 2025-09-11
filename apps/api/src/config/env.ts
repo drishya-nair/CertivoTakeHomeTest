@@ -16,6 +16,18 @@ function parseNumber(value: string | undefined, fallback: number): number {
   return Number.isFinite(n) && n > 0 ? n : fallback;
 }
 
+function parseCorsOrigin(raw: string | undefined): Env['CORS_ORIGIN'] {
+  if (!raw || raw === '*') return '*';
+  // Comma-separated list → string[]; trim whitespace
+  if (raw.includes(',')) {
+    return raw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+  return raw;
+}
+
 export const env: Env = {
   NODE_ENV: process.env.NODE_ENV || "development",
   PORT: parseNumber(process.env.PORT, 4000),
@@ -24,7 +36,7 @@ export const env: Env = {
   DEMO_PASS: process.env.DEMO_PASS || "password",
   LOG_LEVEL: process.env.LOG_LEVEL || "info",
   DATA_DIR: process.env.DATA_DIR,
-  CORS_ORIGIN: process.env.CORS_ORIGIN || "*",
+  CORS_ORIGIN: parseCorsOrigin(process.env.CORS_ORIGIN),
 };
 
 export default env;

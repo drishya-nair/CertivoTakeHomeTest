@@ -1,6 +1,6 @@
 import http from "http";
 import app from "./app";
-import logger from "./middleware/logger";
+import logger from "./lib/logger";
 import env from "./config/env";
 
 const port = env.PORT;

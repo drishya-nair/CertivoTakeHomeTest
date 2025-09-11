@@ -1,9 +1,10 @@
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
-import logger from "./middleware/logger";
+import logger from "./lib/logger";
 import { errorHandler } from "./middleware/errorHandler";
 import apiRoutes from "./routes";
+import notFound from "./middleware/notFound";
 import env from "./config/env";
 import helmet from "helmet";
 
@@ -23,6 +24,9 @@ app.use(
 
 // Routes
 app.use("/", apiRoutes);
+
+// 404 handler
+app.use(notFound);
 
 // Error handling
 app.use(errorHandler);
