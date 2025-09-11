@@ -35,7 +35,6 @@ export async function readBomJson(): Promise<BomData> {
 
 export async function readCompliance(): Promise<ComplianceEntry[]> {
   if (fs.existsSync(complianceCsvPath)) return readComplianceCsv(complianceCsvPath);
-  if (fs.existsSync(complianceJsonPath)) return readComplianceJson(complianceJsonPath);
   logger.error(`Compliance file not found in ${dataDir} (expected CSV or JSON)`);
   throw new Error("Compliance file not found in data directory");
 }
@@ -55,27 +54,6 @@ async function readComplianceCsv(filePath: string): Promise<ComplianceEntry[]> {
       .on("end", () => resolve(results))
       .on("error", (err) => reject(err));
   });
-}
-
-async function readComplianceJson(filePath: string): Promise<ComplianceEntry[]> {
-  try {
-    const raw = await fs.promises.readFile(filePath, "utf-8");
-    const parsed = JSON.parse(raw) as Array<ComplianceEntry>;
-    return parsed.map((e) => ({
-      part_number: String(e.part_number).trim(),
-      substance: String(e.substance).trim(),
-      threshold_ppm: Number(e.threshold_ppm),
-    }));
-  } catch (e) {
-    logger.error(`Failed to parse compliance JSON at ${filePath}`);
-    throw new Error("Invalid compliance JSON format");
-  }
-}
-
-
-export async function writeBomJson(data: BomData): Promise<void> {
-  await fs.promises.mkdir(dataDir, { recursive: true });
-  await fs.promises.writeFile(bomPath, JSON.stringify(data, null, 2));
 }
 
 export const paths = { dataDir, bomPath, complianceCsvPath, complianceJsonPath };

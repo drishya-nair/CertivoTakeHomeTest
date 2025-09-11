@@ -5,7 +5,7 @@ import morgan from "morgan";
 import http from "http";
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
-import { getBom, getDocuments, getMerged, postBom } from "./controllers/apiController";
+import { getBom, getDocuments, getMerged} from "./controllers/apiController";
 import { validateBomData, validateLogin } from "./middleware/validation";
 import logger from "./utils/logger";
 
@@ -46,7 +46,7 @@ app.get("/health", (_req, res) => res.json({ ok: true }));
 app.get("/bom", authenticate, getBom);
 app.get("/documents", authenticate, getDocuments);
 app.get("/merged", authenticate, getMerged);
-app.post("/bom", authenticate, validateBomData, postBom);
+app.post("/bom", authenticate, validateBomData);
 
 // Error handling
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

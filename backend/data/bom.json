@@ -3,7 +3,22 @@
   "product_name": "Smart Sensor",
   "parts": [
     { "part_number": "P-2001", "material": "Copper", "weight_g": 20 },
-    { "part_number": "P-2002", "material": "Plastic", "weight_g": 10 }
+    { "part_number": "P-2002", "material": "Plastic", "weight_g": 10 },
+    { "part_number": "P-2003", "material": "Aluminum", "weight_g": 15 },
+    { "part_number": "P-2004", "material": "Steel", "weight_g": 25 },
+    { "part_number": "P-2005", "material": "Silicone", "weight_g": 5 },
+    { "part_number": "P-2006", "material": "Ceramic", "weight_g": 8 },
+    { "part_number": "P-2007", "material": "Glass", "weight_g": 12 },
+    { "part_number": "P-2008", "material": "Rubber", "weight_g": 9 },
+    { "part_number": "P-2009", "material": "Lithium", "weight_g": 2 },
+    { "part_number": "P-2010", "material": "Nickel", "weight_g": 7 },
+    { "part_number": "P-2011", "material": "Cobalt", "weight_g": 6 },
+    { "part_number": "P-2012", "material": "Tin", "weight_g": 4 },
+    { "part_number": "P-2013", "material": "Gold", "weight_g": 1 },
+    { "part_number": "P-2014", "material": "Silver", "weight_g": 2 },
+    { "part_number": "P-2015", "material": "Brass", "weight_g": 14 },
+    { "part_number": "P-2016", "material": "Polycarbonate", "weight_g": 11 },
+    { "part_number": "P-2017", "material": "ABS", "weight_g": 13 }
   ]
 }
 

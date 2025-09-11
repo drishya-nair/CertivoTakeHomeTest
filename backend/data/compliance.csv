@@ -1,5 +1,18 @@
 part_number,substance,threshold_ppm
 P-2001,Lead,1000
 P-2002,BPA,500
-
-
+P-2003,Mercury,1000
+P-2004,BPA,500
+P-2005,Cadmium,100
+P-2006,Lead,1000
+P-2007,BPA,200
+P-2008,PFAS,50
+P-2009,BPA,100
+P-2010,Chromium VI,1000
+P-2011,BPA,300
+P-2012,Nickel,500
+P-2013,BPA,250
+P-2014,Antimony,500
+P-2015,BPA,400
+P-2016,Phthalates,1000
+P-2017,BPA,150
