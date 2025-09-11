@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { getDocuments } from "../controllers/complianceController";
+import { getCompliance } from "../controllers/complianceController";
 import { authenticate } from "../middleware/auth";
 
 const router = Router();
 
-router.get("/", authenticate, getDocuments);
+router.get("/", authenticate, getCompliance);
 
 export default router;

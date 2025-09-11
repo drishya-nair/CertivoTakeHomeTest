@@ -1,10 +1,11 @@
 import { Request, Response, NextFunction } from "express";
-import { readBomJson, readCompliance } from "../utils/fileReader";
 import { mergeBomAndCompliance } from "../services/mergeService";
+import { DataService } from "../services/dataService";
 
 export async function getMerged(req: Request, res: Response, next: NextFunction) {
   try {
-    const [bom, documents] = await Promise.all([readBomJson(), readCompliance()]);
+    const dataService = new DataService();
+    const { bom, compliance: documents } = await dataService.getMergedData();
     const merged = mergeBomAndCompliance(bom, documents);
     res.json(merged);
   } catch (err) {

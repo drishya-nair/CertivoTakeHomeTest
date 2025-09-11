@@ -16,7 +16,7 @@
       "@certivo/shared-types": ["../../packages/shared-types/dist"]
     }
   },
-  "include": ["src", "tests"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }
 

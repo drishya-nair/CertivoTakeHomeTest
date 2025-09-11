@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from "express";
-import { readBomJson } from "../utils/fileReader";
+import { DataService } from "../services/dataService";
 
 export async function getBom(req: Request, res: Response, next: NextFunction) {
   try {
-    const bom = await readBomJson();
+    const dataService = new DataService();
+    const bom = await dataService.getBomData();
     res.json(bom);
   } catch (err) {
     next(err);

@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from "express";
-import { readCompliance } from "../utils/fileReader";
+import { DataService } from "../services/dataService";
 
-export async function getDocuments(req: Request, res: Response, next: NextFunction) {
+export async function getCompliance(req: Request, res: Response, next: NextFunction) {
   try {
-    const documents = await readCompliance();
+    const dataService = new DataService();
+    const documents = await dataService.getComplianceData();
     res.json(documents);
   } catch (err) {
     next(err);

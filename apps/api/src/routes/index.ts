@@ -12,7 +12,7 @@ router.get("/health", (_req, res) => res.json({ ok: true }));
 // API routes
 router.use("/auth", authRoutes);
 router.use("/bom", bomRoutes);
-router.use("/documents", complianceRoutes);
+router.use("/compliance", complianceRoutes);
 router.use("/merged", mergedRoutes);
 
 export default router;

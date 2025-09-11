@@ -1,18 +1,10 @@
 import http from "http";
-import { Server } from "socket.io";
 import app from "./app";
-import { WebSocketService } from "./services/websocketService";
 import logger from "./middleware/logger";
+import env from "./config/env";
 
-const port = Number(process.env.PORT || 4000);
+const port = env.PORT;
 const server = http.createServer(app);
-
-// WebSocket setup
-const io = new Server(server, { cors: { origin: "*" } });
-app.set("io", io);
-
-// Initialize WebSocket service
-const wsService = new WebSocketService(io);
 
 if (process.env.NODE_ENV !== "test") {
   server.listen(port, () => {
@@ -20,4 +12,4 @@ if (process.env.NODE_ENV !== "test") {
   });
 }
 
-export { server, wsService };
+export { server };

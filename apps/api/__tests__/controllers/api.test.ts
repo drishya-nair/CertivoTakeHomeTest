@@ -1,10 +1,10 @@
 import request from "supertest";
 import fs from "fs";
 import path from "path";
-import app from "../src/app";
-import { ensureDataDir } from "../src/utils/fileReader";
+import app from "../../src/app";
+import { ensureDataDirForTests } from "../utils/dataDir";
 
-const dataDir = ensureDataDir();
+const dataDir = ensureDataDirForTests();
 
 function authHeader(token: string) {
   return { Authorization: `Bearer ${token}` };
