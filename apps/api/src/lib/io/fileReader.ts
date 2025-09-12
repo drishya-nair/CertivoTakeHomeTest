@@ -1,17 +1,17 @@
 import fs from "fs";
 import path from "path";
 import csv from "csv-parser";
-import logger from "../lib/logger";
+import logger from "../logger";
 import { BomData, ComplianceEntry } from "@certivo/shared-types";
 import { fileURLToPath } from "url";
-import env from "../config/env";
+import env from "../../config/env";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const dataDir = env.DATA_DIR
   ? path.resolve(env.DATA_DIR)
-  : path.resolve(__dirname, "..", "..", "data");
+  : path.resolve(__dirname, "..", "..", "..", "data");
 const bomPath = path.join(dataDir, "bom.json");
 const complianceCsvPath = path.join(dataDir, "compliance.csv");
 
@@ -53,4 +53,5 @@ async function readComplianceCsv(filePath: string): Promise<ComplianceEntry[]> {
       .on("error", (err) => reject(err));
   });
 }
+
 

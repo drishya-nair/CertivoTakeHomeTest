@@ -1,4 +1,4 @@
-import { readBomJson, readCompliance } from "../utils/fileReader";
+import { readBomJson, readCompliance } from "../lib/io/fileReader";
 import { BomData, ComplianceEntry } from "@certivo/shared-types";
 
 export class DataService {

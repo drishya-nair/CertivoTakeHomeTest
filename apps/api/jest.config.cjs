@@ -4,7 +4,16 @@ module.exports = {
   testEnvironment: 'node',
   roots: ['<rootDir>/__tests__'],
   moduleFileExtensions: ['ts', 'js'],
-  transform: { '^.+\\.(ts)$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.json' }] },
+  extensionsToTreatAsEsm: ['.ts'],
+  transform: {
+    '^.+\\.(ts)$': [
+      'ts-jest',
+      {
+        tsconfig: '<rootDir>/tsconfig.json',
+        useESM: true,
+      },
+    ],
+  },
 };
 
 
