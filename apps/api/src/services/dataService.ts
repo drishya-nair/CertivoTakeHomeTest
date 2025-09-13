@@ -7,6 +7,9 @@ export class DataService {
     try {
       return await readBomJson();
     } catch (error) {
+      if (error instanceof HttpError) {
+        throw error;
+      }
       throw new HttpError(500, "Failed to retrieve BOM data");
     }
   }
@@ -15,6 +18,9 @@ export class DataService {
     try {
       return await readCompliance();
     } catch (error) {
+      if (error instanceof HttpError) {
+        throw error;
+      }
       throw new HttpError(500, "Failed to retrieve compliance data");
     }
   }
@@ -27,6 +33,9 @@ export class DataService {
       ]);
       return { bom, compliance };
     } catch (error) {
+      if (error instanceof HttpError) {
+        throw error;
+      }
       throw new HttpError(500, "Failed to retrieve merged data");
     }
   }
