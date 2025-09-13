@@ -2,21 +2,23 @@
 import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useComplianceStore } from "@/stores/complianceStore";
+import { useAuth } from "@/contexts/AuthContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 export default function DetailsPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { token, merged, loading, fetchMerged, login } = useComplianceStore();
+  const { merged, loading, fetchMerged } = useComplianceStore();
+  const { login, isAuthenticated } = useAuth();
 
   useEffect(() => {
     (async () => {
-      if (!token) {
+      if (!isAuthenticated) {
         await login(process.env.NEXT_PUBLIC_DEMO_USER || "admin", process.env.NEXT_PUBLIC_DEMO_PASS || "password");
       }
       if (!merged) await fetchMerged();
     })();
-  }, [token, merged, login, fetchMerged]);
+  }, [isAuthenticated, merged, login, fetchMerged]);
 
   const component = merged?.components.find((c) => c.id === params.id);
 

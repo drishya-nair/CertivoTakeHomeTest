@@ -18,12 +18,12 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="p-2 rounded-md border border-gray-300 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors"
+      className="w-16 h-7 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center justify-center"
       aria-label="Toggle theme"
     >
       {theme === "dark" ? (
         <svg
-          className="h-5 w-5 text-yellow-500"
+          className="h-3.5 w-3.5"
           fill="currentColor"
           viewBox="0 0 20 20"
         >
@@ -35,7 +35,7 @@ export default function ThemeToggle() {
         </svg>
       ) : (
         <svg
-          className="h-5 w-5 text-gray-700"
+          className="h-3.5 w-3.5"
           fill="currentColor"
           viewBox="0 0 20 20"
         >

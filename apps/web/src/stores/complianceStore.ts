@@ -12,7 +12,6 @@ type State = {
 };
 
 type Actions = {
-  login: (username: string, password: string) => Promise<void>;
   fetchMerged: () => Promise<void>;
   setFilter: (value: string) => void;
 };
@@ -23,17 +22,6 @@ export const useComplianceStore = create<State & Actions>((set, get) => ({
   loading: false,
   error: undefined,
   filter: "",
-  async login(username, password) {
-    const res = await api.post("/auth/login", { username, password });
-    const token = res.data.token as string;
-    set({ token });
-    setAuthToken(token);
-    const socket = createSocket(API_BASE, token);
-    socket.on("bom:updated", () => {
-      // refresh data in realtime when backend signals an update
-      get().fetchMerged();
-    });
-  },
   async fetchMerged() {
     try {
       set({ loading: true, error: undefined });

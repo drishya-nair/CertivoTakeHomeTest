@@ -133,3 +133,17 @@ export async function login(req: Request, res: Response): Promise<void> {
     throw new HttpError(500, "Authentication failed");
   }
 }
+
+/**
+ * Handles user logout
+ * Note: Since JWT tokens are stateless, logout is handled client-side
+ * by removing the token from storage. This endpoint provides a standard
+ * logout response for consistency.
+ * 
+ * @param req - Express request object
+ * @param res - Express response object for sending logout response
+ * @returns Promise<void>
+ */
+export async function logout(req: Request, res: Response): Promise<void> {
+  res.json({ message: "Logged out successfully" });
+}
