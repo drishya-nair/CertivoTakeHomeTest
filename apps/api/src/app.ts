@@ -4,7 +4,7 @@ import morgan from "morgan";
 import logger from "./lib/logger";
 import { errorHandler } from "./middleware/errorHandler";
 import apiRoutes from "./routes";
-import notFound from "./middleware/notFound";
+import HttpError from "./lib/httpError";
 import env from "./config/env";
 import helmet from "helmet";
 
@@ -26,7 +26,9 @@ app.use(
 app.use("/", apiRoutes);
 
 // 404 handler
-app.use(notFound);
+app.use((_req, _res, next) => {
+  next(new HttpError(404));
+});
 
 // Error handling
 app.use(errorHandler);

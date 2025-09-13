@@ -1,6 +1,15 @@
 import { BomData, ComplianceEntry, MergedComponent, MergedResponse } from "@certivo/shared-types";
+import HttpError from "../lib/httpError";
 
 export function mergeBomAndCompliance(bom: BomData, compliance: ComplianceEntry[]): MergedResponse {
+  // Validate input data
+  if (!bom || !bom.parts || !Array.isArray(bom.parts)) {
+    throw new HttpError(422, "Invalid BOM data structure");
+  }
+  
+  if (!compliance || !Array.isArray(compliance)) {
+    throw new HttpError(422, "Invalid compliance data structure");
+  }
   // Normalize compliance entries by uppercase part number for fast lookup
   const complianceMap = new Map<string, ComplianceEntry>(
     compliance.map((entry) => [entry.part_number.trim().toUpperCase(), entry] as const)
@@ -33,6 +42,10 @@ export function mergeBomAndCompliance(bom: BomData, compliance: ComplianceEntry[
       material: part.material,
     };
   });
+
+  if (components.length === 0) {
+    throw new HttpError(404, "No components found after merging data");
+  }
 
   return { product: bom.product_name, components };
 }

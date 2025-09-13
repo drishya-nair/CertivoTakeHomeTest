@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import env from "../config/env";
+import HttpError from "../lib/httpError";
 
 export async function login(req: Request, res: Response) {
   const username = req.body?.username;
@@ -9,12 +10,12 @@ export async function login(req: Request, res: Response) {
 
   // Basic input validation—keep responses generic to avoid user enumeration
   if (typeof username !== "string" || typeof password !== "string") {
-    return res.status(400).json({ message: "Invalid request body" });
+    throw new HttpError(400, "Invalid request body");
   }
 
   // Optional sane limits to mitigate abuse
   if (username.length > 256 || password.length > 256) {
-    return res.status(400).json({ message: "Invalid request body" });
+    throw new HttpError(400, "Invalid request body");
   }
 
   // Constant-time comparison using fixed-length SHA-256 digests
@@ -30,9 +31,9 @@ export async function login(req: Request, res: Response) {
       });
       return res.json({ token });
     } catch {
-      return res.status(500).json({ message: "Token generation failed" });
+      throw new HttpError(500, "Token generation failed");
     }
   }
 
-  return res.status(401).json({ message: "Invalid credentials" });
+  throw new HttpError(401, "Invalid credentials");
 }
