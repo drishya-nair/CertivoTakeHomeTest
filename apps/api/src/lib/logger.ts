@@ -3,16 +3,28 @@ import env from "../config/env";
 
 const { combine, timestamp, printf, colorize, errors, json } = winston.format;
 
+// Logger configuration constants
+const VALID_LOG_LEVELS = ['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly'] as const;
+const DEFAULT_LOG_LEVEL = 'info';
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_FILES = 5;
+const LOG_DIR = 'logs';
+
+// Type definitions for better type safety
+type LogLevel = typeof VALID_LOG_LEVELS[number];
+
 /**
  * Validates that the log level is supported by Winston
+ * 
+ * @param level - Log level to validate
+ * @returns Validated log level or default if invalid
  */
-function validateLogLevel(level: string): string {
-  const validLevels = ['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly'];
-  const normalizedLevel = level.toLowerCase().trim();
+function validateLogLevel(level: string): LogLevel {
+  const normalizedLevel = level.toLowerCase().trim() as LogLevel;
   
-  if (!validLevels.includes(normalizedLevel)) {
-    console.warn(`[logger] Invalid log level '${level}', falling back to 'info'`);
-    return 'info';
+  if (!VALID_LOG_LEVELS.includes(normalizedLevel)) {
+    console.warn(`[logger] Invalid log level '${level}', falling back to '${DEFAULT_LOG_LEVEL}'`);
+    return DEFAULT_LOG_LEVEL;
   }
   
   return normalizedLevel;
@@ -20,6 +32,7 @@ function validateLogLevel(level: string): string {
 
 /**
  * Creates a human-readable format for development
+ * Includes colorized output, timestamps, and stack traces
  */
 const devFormat = combine(
   errors({ stack: true }),
@@ -34,6 +47,7 @@ const devFormat = combine(
 
 /**
  * Creates a structured JSON format for production
+ * Optimized for log aggregation and analysis
  */
 const prodFormat = combine(
   errors({ stack: true }),
@@ -43,6 +57,8 @@ const prodFormat = combine(
 
 /**
  * Creates appropriate transports based on environment
+ * 
+ * @returns Array of Winston transports configured for the current environment
  */
 function createTransports(): winston.transport[] {
   const transports: winston.transport[] = [];
@@ -56,26 +72,28 @@ function createTransports(): winston.transport[] {
   
   transports.push(consoleTransport);
   
-  // File transport for production
+  // File transports for production
   if (env.NODE_ENV === 'production') {
-    const fileTransport = new winston.transports.File({
-      filename: 'logs/error.log',
+    // Error log file
+    const errorFileTransport = new winston.transports.File({
+      filename: `${LOG_DIR}/error.log`,
       level: 'error',
       format: prodFormat,
-      maxsize: 5242880, // 5MB
-      maxFiles: 5,
+      maxsize: MAX_FILE_SIZE,
+      maxFiles: MAX_FILES,
       handleExceptions: true,
       handleRejections: true,
     });
     
+    // Combined log file
     const combinedFileTransport = new winston.transports.File({
-      filename: 'logs/combined.log',
+      filename: `${LOG_DIR}/combined.log`,
       format: prodFormat,
-      maxsize: 5242880, // 5MB
-      maxFiles: 5,
+      maxsize: MAX_FILE_SIZE,
+      maxFiles: MAX_FILES,
     });
     
-    transports.push(fileTransport, combinedFileTransport);
+    transports.push(errorFileTransport, combinedFileTransport);
   }
   
   return transports;
@@ -83,6 +101,8 @@ function createTransports(): winston.transport[] {
 
 /**
  * Creates and configures the Winston logger instance
+ * 
+ * @returns Configured Winston logger instance
  */
 function createLogger(): winston.Logger {
   const validatedLevel = validateLogLevel(env.LOG_LEVEL);
@@ -101,8 +121,14 @@ function createLogger(): winston.Logger {
 // Create the logger instance
 export const logger = createLogger();
 
-// Add helper methods for common logging patterns
-export const logRequest = (req: any, res: any, responseTime: number) => {
+/**
+ * Logs HTTP request information with structured data
+ * 
+ * @param req - Express request object
+ * @param res - Express response object
+ * @param responseTime - Response time in milliseconds
+ */
+export const logRequest = (req: any, res: any, responseTime: number): void => {
   logger.info('HTTP Request', {
     method: req.method,
     url: req.url,
@@ -113,7 +139,13 @@ export const logRequest = (req: any, res: any, responseTime: number) => {
   });
 };
 
-export const logError = (error: Error, context?: Record<string, any>) => {
+/**
+ * Logs application errors with context information
+ * 
+ * @param error - Error object to log
+ * @param context - Optional context data to include with the error
+ */
+export const logError = (error: Error, context?: Record<string, any>): void => {
   logger.error('Application Error', {
     message: error.message,
     stack: error.stack,
