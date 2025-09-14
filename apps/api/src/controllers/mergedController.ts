@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { MergeService } from "../services/mergeService";
+
+import { MergeService } from "@/services/mergeService";
 
 /**
  * Retrieves and merges BOM and compliance data into a unified response

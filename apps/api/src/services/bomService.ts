@@ -1,5 +1,6 @@
 import { BomData } from "@certivo/shared-types";
-import { readBomJson } from "../lib/io/fileReader";
+
+import { readBomJson } from "@/lib/io/fileReader";
 
 /**
  * Service for BOM (Bill of Materials) operations

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { ComplianceService } from "../services/complianceService";
+
+import { ComplianceService } from "@/services/complianceService";
 
 /**
  * Retrieves and returns compliance data

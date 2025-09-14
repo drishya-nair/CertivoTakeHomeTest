@@ -1,5 +1,6 @@
 import { BomData, ComplianceEntry, MergedComponent, MergedResponse } from "@certivo/shared-types";
-import { createError } from "../middleware/errorHandler";
+
+import { createError } from "@/middleware/errorHandler";
 import { BomService } from "./bomService";
 import { ComplianceService } from "./complianceService";
 

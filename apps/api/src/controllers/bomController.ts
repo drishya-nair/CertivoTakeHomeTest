@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { BomService } from "../services/bomService";
+
+import { BomService } from "@/services/bomService";
 
 /**
  * Retrieves and returns BOM (Bill of Materials) data

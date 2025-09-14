@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import logger from "../lib/logger";
+
+import logger from "@/lib/logger";
 
 /**
  * Global error handling middleware for Express applications

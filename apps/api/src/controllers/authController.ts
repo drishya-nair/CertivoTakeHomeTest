@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import env from "../config/env";
-import { createError } from "../middleware/errorHandler";
+
+import env from "@/config/env";
+import { createError } from "@/middleware/errorHandler";
 
 // Constants for security and validation
 const MAX_INPUT_LENGTH = 256;

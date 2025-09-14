@@ -1,7 +1,8 @@
 import http from "http";
+
 import app from "./app";
-import logger from "./lib/logger";
-import env from "./config/env";
+import logger from "@/lib/logger";
+import env from "@/config/env";
 
 // Server configuration
 const port = env.PORT;

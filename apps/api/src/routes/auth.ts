@@ -1,7 +1,8 @@
 import { Router, Request, Response, NextFunction } from "express";
 import Joi from "joi";
-import { login, logout } from "../controllers/authController";
-import { authenticate } from "../middleware/auth";
+
+import { login, logout } from "@/controllers/authController";
+import { authenticate } from "@/middleware/auth";
 
 const router = Router();
 

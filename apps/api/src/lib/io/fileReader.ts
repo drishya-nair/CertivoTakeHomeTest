@@ -1,11 +1,12 @@
 import fs from "fs";
 import path from "path";
 import csv from "csv-parser";
-import logger from "../logger";
-import { BomData, ComplianceEntry } from "@certivo/shared-types";
 import { fileURLToPath } from "url";
-import env from "../../config/env";
-import { createError } from "../../middleware/errorHandler";
+
+import { BomData, ComplianceEntry } from "@certivo/shared-types";
+import env from "@/config/env";
+import { createError } from "@/middleware/errorHandler";
+import logger from "../logger";
 
 // File system constants
 const __filename = fileURLToPath(import.meta.url);

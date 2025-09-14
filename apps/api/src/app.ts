@@ -1,11 +1,12 @@
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
-import logger from "./lib/logger";
-import { errorHandler } from "./middleware/errorHandler";
-import apiRoutes from "./routes";
-import env from "./config/env";
 import helmet from "helmet";
+
+import logger from "@/lib/logger";
+import { errorHandler } from "@/middleware/errorHandler";
+import apiRoutes from "@/routes";
+import env from "@/config/env";
 
 // Error interface for type safety
 /**

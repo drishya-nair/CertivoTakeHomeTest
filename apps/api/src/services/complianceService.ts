@@ -1,5 +1,6 @@
 import { ComplianceEntry } from "@certivo/shared-types";
-import { readCompliance } from "../lib/io/fileReader";
+
+import { readCompliance } from "@/lib/io/fileReader";
 
 /**
  * Service for compliance operations

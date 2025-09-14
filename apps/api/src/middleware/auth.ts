@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import env from "../config/env";
+
+import env from "@/config/env";
 
 // Authentication constants
 const BEARER_SCHEME = "bearer";
