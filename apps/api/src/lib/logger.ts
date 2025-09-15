@@ -1,97 +1,67 @@
 import winston from "winston";
+import fs from "fs";
 
 import env from "@/config/env";
 
-const { combine, timestamp, printf, colorize, errors, json } = winston.format;
+// Simple logger configuration appropriate for small projects
+const isProduction = env.NODE_ENV === 'production';
+const logLevel = env.LOG_LEVEL || 'info';
 
-// Configuration constants
-const VALID_LOG_LEVELS = ['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly'] as const;
-const DEFAULT_LOG_LEVEL = 'info';
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
-const MAX_FILES = 5;
-const LOG_DIR = 'logs';
-
-type LogLevel = typeof VALID_LOG_LEVELS[number];
-
-/**
- * Validates log level and returns default if invalid
- * 
- * @param level - Log level to validate
- * @returns Validated log level
- */
-function validateLogLevel(level: string): LogLevel {
-  const normalizedLevel = level.toLowerCase().trim() as LogLevel;
-  
-  if (!VALID_LOG_LEVELS.includes(normalizedLevel)) {
-    winston.warn(`[logger] Invalid log level '${level}', falling back to '${DEFAULT_LOG_LEVEL}'`);
-    return DEFAULT_LOG_LEVEL;
-  }
-  
-  return normalizedLevel;
+// Ensure logs directory exists in production
+if (isProduction && !fs.existsSync('logs')) {
+  fs.mkdirSync('logs', { recursive: true });
 }
 
-// Format configurations
-const devFormat = combine(
-  errors({ stack: true }),
-  timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-  colorize({ all: true }),
-  printf(({ level, message, timestamp: ts, stack, ...meta }) => {
+// Development format: colored console output
+const devFormat = winston.format.combine(
+  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+  winston.format.colorize(),
+  winston.format.printf(({ timestamp, level, message, ...meta }) => {
     const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
-    const stackStr = stack ? `\n${stack}` : '';
-    return `${ts} [${level}] ${message}${metaStr}${stackStr}`;
+    return `${timestamp} [${level}] ${message}${metaStr}`;
   })
 );
 
-const prodFormat = combine(
-  errors({ stack: true }),
-  timestamp(),
-  json()
+// Production format: JSON with file rotation
+const prodFormat = winston.format.combine(
+  winston.format.timestamp(),
+  winston.format.errors({ stack: true }),
+  winston.format.json()
 );
 
-/**
- * Creates Winston transports based on environment
- * 
- * @returns Array of configured transports
- */
-function createTransports(): winston.transport[] {
-  const transports: winston.transport[] = [
-    new winston.transports.Console({
-      format: env.NODE_ENV === 'production' ? prodFormat : devFormat,
-      handleExceptions: true,
-      handleRejections: true,
+// Create transports based on environment
+const transports: winston.transport[] = [
+  new winston.transports.Console({
+    format: isProduction ? prodFormat : devFormat,
+    level: logLevel,
+  })
+];
+
+// Add file logging in production
+if (isProduction) {
+  transports.push(
+    new winston.transports.File({
+      filename: 'logs/error.log',
+      level: 'error',
+      format: prodFormat,
+      maxsize: 5 * 1024 * 1024, // 5MB
+      maxFiles: 5,
+    }),
+    new winston.transports.File({
+      filename: 'logs/combined.log',
+      format: prodFormat,
+      maxsize: 5 * 1024 * 1024, // 5MB
+      maxFiles: 5,
     })
-  ];
-  
-  if (env.NODE_ENV === 'production') {
-    transports.push(
-      new winston.transports.File({
-        filename: `${LOG_DIR}/error.log`,
-        level: 'error',
-        format: prodFormat,
-        maxsize: MAX_FILE_SIZE,
-        maxFiles: MAX_FILES,
-        handleExceptions: true,
-        handleRejections: true,
-      }),
-      new winston.transports.File({
-        filename: `${LOG_DIR}/combined.log`,
-        format: prodFormat,
-        maxsize: MAX_FILE_SIZE,
-        maxFiles: MAX_FILES,
-      })
-    );
-  }
-  
-  return transports;
+  );
 }
 
 // Create logger instance
 export const logger = winston.createLogger({
-  level: validateLogLevel(env.LOG_LEVEL),
-  format: env.NODE_ENV === 'production' ? prodFormat : devFormat,
-  transports: createTransports(),
+  level: logLevel,
+  format: isProduction ? prodFormat : devFormat,
+  transports,
   exitOnError: false,
-  silent: false,
 });
 
 /**
