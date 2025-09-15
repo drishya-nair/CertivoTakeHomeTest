@@ -16,6 +16,7 @@ export interface ComplianceEntry {
   part_number: string;
   substance: string;
   threshold_ppm: number;
+  substance_mass_mg: number;
 }
 
 export interface MergedComponent {

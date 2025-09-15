@@ -37,6 +37,7 @@ const ComplianceEntrySchema = z.object({
   part_number: z.string().min(1),
   substance: z.string().min(1),
   threshold_ppm: z.number().min(0),
+  substance_mass_mg: z.number().min(0),
 });
 
 /**
@@ -105,6 +106,7 @@ async function readComplianceCsv(filePath: string): Promise<ComplianceEntry[]> {
             part_number: String(data.part_number || '').trim(),
             substance: String(data.substance || '').trim(),
             threshold_ppm: Number(data.threshold_ppm || 0),
+            substance_mass_mg: Number(data.substance_mass_mg || 0),
           };
 
           results.push(ComplianceEntrySchema.parse(parsedData));

@@ -6,7 +6,6 @@ import { BomService } from "./bomService";
 import { ComplianceService } from "./complianceService";
 
 // Business logic constants
-const ALLOWED_SUBSTANCE = "bpa";
 const MASS_UNIT = "g";
 
 // Validation schemas for runtime type checking
@@ -24,6 +23,7 @@ const ComplianceEntryArraySchema = z.array(z.object({
   part_number: z.string().min(1),
   substance: z.string().min(1),
   threshold_ppm: z.number().min(0),
+  substance_mass_mg: z.number().min(0),
 }));
 
 /**
@@ -96,7 +96,10 @@ export class MergeService {
         };
       }
 
-      const isCompliant = entry.substance.trim().toLowerCase() === ALLOWED_SUBSTANCE;
+      // Calculate ppm: substance_mass_mg / (part_weight_g / 1000)
+      const partWeightKg = part.weight_g / 1000;
+      const ppm = entry.substance_mass_mg / partWeightKg;
+      const isCompliant = ppm <= entry.threshold_ppm;
       
       return {
         id: partId,

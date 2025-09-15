@@ -37,8 +37,8 @@ describe("MergeService", () => {
       };
 
       const mockComplianceData: ComplianceEntry[] = [
-        { part_number: "P-1001", substance: "Lead", threshold_ppm: 1000 },
-        { part_number: "P-1002", substance: "BPA", threshold_ppm: 500 }
+        { part_number: "P-1001", substance: "Lead", threshold_ppm: 1000, substance_mass_mg: 60 }, // 60mg / 0.05kg = 1200 ppm > 1000 threshold = Non-Compliant
+        { part_number: "P-1002", substance: "BPA", threshold_ppm: 500, substance_mass_mg: 10 } // 10mg / 0.025kg = 400 ppm < 500 threshold = Compliant
       ];
 
       mockBomService.getBomData.mockResolvedValue(mockBomData);
@@ -80,7 +80,7 @@ describe("MergeService", () => {
       };
 
       const mockComplianceData: ComplianceEntry[] = [
-        { part_number: "P-1001", substance: "Lead", threshold_ppm: 1000 }
+        { part_number: "P-1001", substance: "Lead", threshold_ppm: 1000, substance_mass_mg: 30 }
       ];
 
       mockBomService.getBomData.mockResolvedValue(mockBomData);
@@ -111,7 +111,7 @@ describe("MergeService", () => {
       };
 
       const mockComplianceData: ComplianceEntry[] = [
-        { part_number: "P-1001", substance: "BPA", threshold_ppm: 500 }
+        { part_number: "P-1001", substance: "BPA", threshold_ppm: 500, substance_mass_mg: 20 } // 20mg / 0.05kg = 400 ppm < 500 threshold = Compliant
       ];
 
       mockBomService.getBomData.mockResolvedValue(mockBomData);
@@ -132,7 +132,7 @@ describe("MergeService", () => {
       };
 
       const mockComplianceData: ComplianceEntry[] = [
-        { part_number: "P-1001", substance: "lead", threshold_ppm: 1000 }
+        { part_number: "P-1001", substance: "lead", threshold_ppm: 1000, substance_mass_mg: 60 } // 60mg / 0.05kg = 1200 ppm > 1000 threshold = Non-Compliant
       ];
 
       mockBomService.getBomData.mockResolvedValue(mockBomData);
@@ -153,7 +153,7 @@ describe("MergeService", () => {
       };
 
       const mockComplianceData: ComplianceEntry[] = [
-        { part_number: "P-1001", substance: "BPA", threshold_ppm: 500 }
+        { part_number: "P-1001", substance: "BPA", threshold_ppm: 500, substance_mass_mg: 20 } // 20mg / 0.05kg = 400 ppm < 500 threshold = Compliant
       ];
 
       mockBomService.getBomData.mockResolvedValue(mockBomData);
@@ -175,7 +175,7 @@ describe("MergeService", () => {
       };
 
       const mockComplianceData: ComplianceEntry[] = [
-        { part_number: "P-1001", substance: "BPA", threshold_ppm: 500 }
+        { part_number: "P-1001", substance: "BPA", threshold_ppm: 500, substance_mass_mg: 20 } // 20mg / 0.05kg = 400 ppm < 500 threshold = Compliant
       ];
 
       mockBomService.getBomData.mockResolvedValue(mockBomData);
@@ -241,7 +241,8 @@ describe("MergeService", () => {
       const largeCompliance = Array.from({ length: 1000 }, (_, i) => ({
         part_number: `P-${String(i).padStart(4, '0')}`,
         substance: i % 2 === 0 ? "BPA" : "Lead",
-        threshold_ppm: Math.max(0, Math.floor(Math.random() * 1000)) // Ensure threshold_ppm is non-negative
+        threshold_ppm: Math.max(0, Math.floor(Math.random() * 1000)), // Ensure threshold_ppm is non-negative
+        substance_mass_mg: Math.max(0.1, Math.random() * 50) // Random substance mass between 0.1-50mg
       }));
 
       const mockBomData: BomData = {

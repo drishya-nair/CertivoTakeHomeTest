@@ -1,15 +1,15 @@
-part_number,substance,threshold_ppm
-P-2001,Lead,1000
-P-2002,BPA,500
-P-2003,Mercury,1000
-P-2004,BPA,500
-P-2005,Cadmium,100
-P-2006,Lead,1000
-P-2007,BPA,200
-P-2008,PFAS,50
-P-2009,BPA,100
-P-2010,Chromium VI,1000
-P-2011,BPA,300
-P-2012,Nickel,500
-P-2013,BPA,250
-P-2014,Antimony,500
+part_number,substance,threshold_ppm,substance_mass_mg
+P-2001,Lead,1000,15
+P-2002,BPA,10,3.5
+P-2003,Mercury,1000,18
+P-2004,BPA,500,8
+P-2005,Cadmium,100,0.6
+P-2006,Lead,1000,6
+P-2007,BPA,200,1.5
+P-2008,PFAS,50,0.3
+P-2009,BPA,100,0.1
+P-2010,Chromium VI,1000,5
+P-2011,BPA,300,1.2
+P-2012,Nickel,500,1.5
+P-2013,BPA,250,0.2
+P-2014,Antimony,300,0.8
