@@ -6,7 +6,7 @@ import helmet from "helmet";
 import logger from "@/lib/logger";
 import { errorHandler } from "@/middleware/errorHandler";
 import apiRoutes from "@/routes";
-import env from "@/config/env";
+import env, { getEnvWarnings } from "@/config/env";
 
 // Error interface for type safety
 /**
@@ -48,6 +48,9 @@ function createApp(): express.Application {
       },
     })
   );
+
+  // Log any environment warnings at startup
+  getEnvWarnings().forEach((msg) => logger.warn(msg));
 
   // API routes
   app.use("/", apiRoutes);

@@ -24,7 +24,8 @@ function validateLogLevel(level: string): LogLevel {
   const normalizedLevel = level.toLowerCase().trim() as LogLevel;
   
   if (!VALID_LOG_LEVELS.includes(normalizedLevel)) {
-    console.warn(`[logger] Invalid log level '${level}', falling back to '${DEFAULT_LOG_LEVEL}'`);
+    // Use Winston's default logger to avoid console usage
+    winston.warn(`[logger] Invalid log level '${level}', falling back to '${DEFAULT_LOG_LEVEL}'`);
     return DEFAULT_LOG_LEVEL;
   }
   

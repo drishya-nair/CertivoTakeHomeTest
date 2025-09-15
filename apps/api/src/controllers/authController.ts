@@ -4,6 +4,7 @@ import crypto from "crypto";
 
 import env from "@/config/env";
 import { createError } from "@/middleware/errorHandler";
+import logger from "@/lib/logger";
 
 // Constants for security and validation
 const MAX_INPUT_LENGTH = 256;
@@ -115,7 +116,7 @@ function generateToken(username: string): string {
       algorithm: JWT_ALGORITHM,
     });
   } catch (error) {
-    console.error("JWT generation failed:", error);
+    logger.error("JWT generation failed", { error });
     throw createError("Token generation failed", 500);
   }
 }

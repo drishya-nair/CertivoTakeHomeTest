@@ -38,6 +38,7 @@ const complianceCsvPath = path.join(dataDir, "compliance.csv");
  */
 export async function readBomJson(): Promise<BomData> {
   if (!fs.existsSync(bomPath)) {
+    logger.warn(`BOM file missing at path: ${bomPath}`);
     throw createError("BOM file not found", 404);
   }
 
@@ -73,6 +74,7 @@ export async function readBomJson(): Promise<BomData> {
  */
 export async function readCompliance(): Promise<ComplianceEntry[]> {
   if (!fs.existsSync(complianceCsvPath)) {
+    logger.warn(`Compliance CSV missing at path: ${complianceCsvPath}`);
     throw createError("Compliance file not found", 404);
   }
 
@@ -112,6 +114,7 @@ async function readComplianceCsv(filePath: string): Promise<ComplianceEntry[]> {
       })
       .on("end", () => {
         if (results.length === 0) {
+          logger.warn("Compliance CSV parsed but contained no valid entries");
           reject(createError("No valid compliance data found", 422));
           return;
         }

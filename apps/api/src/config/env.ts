@@ -41,14 +41,21 @@ const env: Env = {
   CORS_ORIGIN: process.env.CORS_ORIGIN || "*",
 };
 
-// Basic production warnings
-if (env.NODE_ENV === "production") {
-  if (env.JWT_SECRET === "demo-secret") {
-    console.warn("[env] Using demo JWT_SECRET in production - this is insecure!");
+/**
+ * Returns environment warnings without logging
+ * Logging is performed at app startup using the central logger
+ */
+export function getEnvWarnings(): string[] {
+  const warnings: string[] = [];
+  if (env.NODE_ENV === "production") {
+    if (env.JWT_SECRET === "demo-secret") {
+      warnings.push("[env] Using demo JWT_SECRET in production - this is insecure!");
+    }
+    if (env.CORS_ORIGIN === "*") {
+      warnings.push("[env] CORS_ORIGIN is set to '*' in production - consider restricting to specific domains");
+    }
   }
-  if (env.CORS_ORIGIN === "*") {
-    console.warn("[env] CORS_ORIGIN is set to '*' in production - consider restricting to specific domains");
-  }
+  return warnings;
 }
 
 export { env };
