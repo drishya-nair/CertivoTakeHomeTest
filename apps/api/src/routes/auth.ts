@@ -1,21 +1,18 @@
 import { Router } from "express";
 import { z } from "zod";
 
-import { login, logout } from "@/controllers/authController";
-import { authenticate } from "@/middleware/auth";
+import { login, refresh } from "@/controllers/authController";
 import { validateRequest } from "../middleware/validation";
 
 const router = Router();
 
-/**
- * Zod validation schema for login requests
- */
+// Validation schema for login requests
 const loginSchema = z.object({
-  username: z.string().min(1, "Username is required").max(50, "Username too long"),
-  password: z.string().min(1, "Password is required").max(100, "Password too long"),
+  username: z.string().min(1).max(50),
+  password: z.string().min(1).max(100),
 });
 
 router.post("/login", validateRequest(loginSchema), login);
-router.post("/logout", authenticate, logout);
+router.post("/refresh", refresh);
 
 export default router;

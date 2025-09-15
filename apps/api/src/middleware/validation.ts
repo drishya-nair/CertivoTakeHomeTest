@@ -11,7 +11,6 @@ import { createError } from "./errorHandler";
 export function validateRequest<T>(schema: ZodSchema<T>) {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
-      // Validate and transform the request body
       req.body = schema.parse(req.body);
       next();
     } catch (error) {
@@ -28,7 +27,6 @@ export function validateRequest<T>(schema: ZodSchema<T>) {
         return;
       }
 
-      // Handle unexpected errors
       throw createError("Validation error", 500);
     }
   };

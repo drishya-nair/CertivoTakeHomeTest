@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 
@@ -6,13 +6,16 @@ import env from "@/config/env";
 import { createError } from "@/middleware/errorHandler";
 import logger from "@/lib/logger";
 
-// Constants for security
+// Security constants
 const TOKEN_EXPIRY = "2h";
 const JWT_ALGORITHM = "HS256" as const;
 
-// Type definitions
+// Pre-computed credential hashes for constant-time comparison
+const expectedUsernameHash = crypto.createHash("sha256").update(env.DEMO_USER).digest();
+const expectedPasswordHash = crypto.createHash("sha256").update(env.DEMO_PASS).digest();
+
 /**
- * Request payload for user login (validated by Zod middleware)
+ * Request payload for user login
  */
 interface LoginRequest {
   username: string;
@@ -20,55 +23,29 @@ interface LoginRequest {
 }
 
 /**
- * Response payload for successful login
- */
-interface LoginResponse {
-  token: string;
-}
-
-/**
- * JWT token payload structure
- */
-interface JwtPayload {
-  sub: string;
-  iat?: number;
-  exp?: number;
-}
-
-/**
- * Performs constant-time comparison using SHA-256 hashes
- * Prevents timing attacks by ensuring comparison time is independent of input
+ * Verifies credentials using constant-time comparison to prevent timing attacks
  * 
  * @param username - Username to verify
  * @param password - Password to verify
- * @returns True if credentials match, false otherwise
+ * @returns True if credentials match
  */
 function verifyCredentials(username: string, password: string): boolean {
-  const hash = (value: string) => crypto.createHash("sha256").update(value, "utf8").digest();
+  const usernameHash = crypto.createHash("sha256").update(username).digest();
+  const passwordHash = crypto.createHash("sha256").update(password).digest();
   
-  const usernameHash = hash(username);
-  const passwordHash = hash(password);
-  const expectedUsernameHash = hash(env.DEMO_USER);
-  const expectedPasswordHash = hash(env.DEMO_PASS);
-
-  const isUserMatch = crypto.timingSafeEqual(usernameHash, expectedUsernameHash);
-  const isPassMatch = crypto.timingSafeEqual(passwordHash, expectedPasswordHash);
-
-  return isUserMatch && isPassMatch;
+  return crypto.timingSafeEqual(usernameHash, expectedUsernameHash) &&
+         crypto.timingSafeEqual(passwordHash, expectedPasswordHash);
 }
 
 /**
- * Generates a JWT token with proper error handling
+ * Generates a JWT token
  * 
- * @param username - Username to include in token payload
+ * @param username - Username to include in token
  * @returns JWT token string
- * @throws {Error} 500 if token generation fails
  */
 function generateToken(username: string): string {
   try {
-    const payload: JwtPayload = { sub: username };
-    
-    return jwt.sign(payload, env.JWT_SECRET, {
+    return jwt.sign({ sub: username }, env.JWT_SECRET, {
       expiresIn: TOKEN_EXPIRY,
       algorithm: JWT_ALGORITHM,
     });
@@ -81,39 +58,47 @@ function generateToken(username: string): string {
 /**
  * Handles user authentication and token generation
  * 
- * Security features:
- * - Constant-time credential comparison to prevent timing attacks
- * - Generic error messages to prevent user enumeration
- * - Input validation handled by Zod middleware
- * - Proper JWT token generation with secure defaults
- * 
- * @param req - Express request object containing validated login credentials
- * @param res - Express response object for sending authentication response
- * @returns Promise<void>
+ * @param req - Express request with login credentials
+ * @param res - Express response object
+ * @param next - Express next function
  */
-export async function login(req: Request, res: Response): Promise<void> {
-  const { username, password } = req.body as LoginRequest;
+export async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { username, password } = req.body as LoginRequest;
 
-  if (!verifyCredentials(username, password)) {
-    throw createError("Invalid credentials", 401);
+    if (!verifyCredentials(username, password)) {
+      throw createError("Invalid credentials", 401);
+    }
+
+    res.json({ token: generateToken(username) });
+  } catch (error) {
+    next(error);
   }
-
-  const token = generateToken(username);
-  const response: LoginResponse = { token };
-  
-  res.json(response);
 }
 
 /**
- * Handles user logout
- * Note: Since JWT tokens are stateless, logout is handled client-side
- * by removing the token from storage. This endpoint provides a standard
- * logout response for consistency.
+ * Handles token refresh by validating existing token and issuing a new one
  * 
- * @param req - Express request object
- * @param res - Express response object for sending logout response
- * @returns Promise<void>
+ * @param req - Express request with Authorization header
+ * @param res - Express response object
+ * @param next - Express next function
  */
-export async function logout(req: Request, res: Response): Promise<void> {
-  res.json({ message: "Logged out successfully" });
+export async function refresh(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader?.startsWith("Bearer ")) {
+      throw createError("Invalid token", 401);
+    }
+
+    const token = authHeader.substring(7);
+    const decoded = jwt.verify(token, env.JWT_SECRET, { algorithms: [JWT_ALGORITHM] }) as { sub: string };
+    
+    res.json({ token: generateToken(decoded.sub) });
+  } catch (error) {
+    if (error instanceof jwt.JsonWebTokenError) {
+      throw createError("Invalid token", 401);
+    }
+    next(error);
+  }
 }

@@ -13,7 +13,6 @@ import logger from "@/lib/logger";
 export function errorHandler(err: any, _req: Request, res: Response, _next: NextFunction): void {
   logger.error(err?.stack || String(err));
   
-  // Extract status code from error, default to 500
   const status = Number(err?.statusCode) || Number(err?.status) || 500;
   const message = err?.message || (status >= 500 ? "Internal Server Error" : "Bad Request");
   
@@ -21,7 +20,11 @@ export function errorHandler(err: any, _req: Request, res: Response, _next: Next
 }
 
 /**
- * Helper function to create errors with status codes
+ * Creates errors with status codes for consistent error handling
+ * 
+ * @param message - Error message
+ * @param statusCode - HTTP status code (default: 500)
+ * @returns Error object with status code
  */
 export function createError(message: string, statusCode: number = 500): Error {
   const error = new Error(message);

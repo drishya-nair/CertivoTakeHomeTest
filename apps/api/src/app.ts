@@ -8,66 +8,49 @@ import { errorHandler } from "@/middleware/errorHandler";
 import apiRoutes from "@/routes";
 import env, { getEnvWarnings } from "@/config/env";
 
-// Error interface for type safety
 /**
- * Extended Error interface with HTTP status code
+ * Express application with security, logging, and error handling middleware
  * 
- * Used for creating errors that can carry HTTP status codes
- * for proper error handling in Express middleware
+ * Configures the main API server with:
+ * - Security headers via Helmet
+ * - CORS configuration
+ * - Request logging via Morgan
+ * - JSON body parsing with size limits
+ * - API routes
+ * - 404 and global error handling
  */
-interface ErrorWithStatusCode extends Error {
-  /** HTTP status code for the error */
-  statusCode?: number;
-}
+const app = express();
 
-/**
- * Creates and configures the Express application
- * 
- * Sets up middleware, routes, and error handling for the API server.
- * Includes security middleware, CORS, logging, and proper error handling.
- * 
- * @returns Configured Express application
- */
-function createApp(): express.Application {
-  const app = express();
+// Security and CORS middleware
+app.use(helmet());
+app.use(cors({ origin: env.CORS_ORIGIN }));
 
-  // Security middleware
-  app.use(helmet());
-  
-  // CORS configuration
-  app.use(cors({ origin: env.CORS_ORIGIN }));
-  
-  // Body parsing middleware
-  app.use(express.json({ limit: '10mb' }));
-  
-  // Request logging middleware
-  app.use(
-    morgan("combined", {
-      stream: {
-        write: (message) => logger.info(message.trim()),
-      },
-    })
-  );
+// Body parsing with size limit
+app.use(express.json({ limit: '10mb' }));
 
-  // Log any environment warnings at startup
-  getEnvWarnings().forEach((msg) => logger.warn(msg));
+// Request logging
+app.use(
+  morgan("combined", {
+    stream: {
+      write: (message) => logger.info(message.trim()),
+    },
+  })
+);
 
-  // API routes
-  app.use("/", apiRoutes);
+// Log environment warnings at startup
+getEnvWarnings().forEach((msg) => logger.warn(msg));
 
-  // 404 handler for unmatched routes
-  app.use((_req, _res, next) => {
-    const error = new Error("Not Found") as ErrorWithStatusCode;
-    error.statusCode = 404;
-    next(error);
-  });
+// API routes
+app.use("/", apiRoutes);
 
-  // Global error handling middleware
-  app.use(errorHandler);
+// 404 handler for unmatched routes
+app.use((_req, _res, next) => {
+  const error = new Error("Not Found") as Error & { statusCode?: number };
+  error.statusCode = 404;
+  next(error);
+});
 
-  return app;
-}
+// Global error handling
+app.use(errorHandler);
 
-// Create and export the configured application
-const app = createApp();
 export default app;

@@ -4,45 +4,17 @@ import app from "./app";
 import logger from "@/lib/logger";
 import env from "@/config/env";
 
-// Server configuration
-const port = env.PORT;
-const server = http.createServer(app);
-
 /**
- * Starts the HTTP server and sets up graceful shutdown handling
- * 
- * Creates an HTTP server instance and starts listening on the configured port.
- * Includes proper error handling and graceful shutdown for production environments.
+ * HTTP server instance with Express application
  */
-function startServer(): void {
-  // Start server only if not in test environment
-  if (process.env.NODE_ENV !== "test") {
-    server.listen(port, () => {
-      logger.info(`Backend listening on http://localhost:${port}`);
-    });
-
-    // Handle server errors
-    server.on('error', (error: NodeJS.ErrnoException) => {
-      if (error.code === 'EADDRINUSE') {
-        logger.error(`Port ${port} is already in use`);
-        process.exit(1);
-      } else {
-        logger.error('Server error:', error);
-        process.exit(1);
-      }
-    });
-
-    // Graceful shutdown handling
-    process.on('SIGTERM', gracefulShutdown);
-    process.on('SIGINT', gracefulShutdown);
-  }
-}
+const server = http.createServer(app);
 
 /**
  * Handles graceful shutdown of the server
  * 
  * Closes the server gracefully when receiving termination signals,
  * allowing existing connections to complete before shutting down.
+ * Forces shutdown after 10 seconds if graceful close fails.
  */
 function gracefulShutdown(): void {
   logger.info('Received shutdown signal, closing server gracefully...');
@@ -59,7 +31,27 @@ function gracefulShutdown(): void {
   }, 10000);
 }
 
-// Start the server
-startServer();
+// Start server only if not in test environment
+if (process.env.NODE_ENV !== "test") {
+  const port = env.PORT;
+  
+  server.listen(port, () => {
+    logger.info(`Backend listening on http://localhost:${port}`);
+  });
+
+  // Handle server errors
+  server.on('error', (error: NodeJS.ErrnoException) => {
+    if (error.code === 'EADDRINUSE') {
+      logger.error(`Port ${port} is already in use`);
+    } else {
+      logger.error('Server error:', error);
+    }
+    process.exit(1);
+  });
+
+  // Graceful shutdown handling
+  process.on('SIGTERM', gracefulShutdown);
+  process.on('SIGINT', gracefulShutdown);
+}
 
 export { server };

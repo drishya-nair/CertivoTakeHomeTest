@@ -4,27 +4,25 @@ import env from "@/config/env";
 
 const { combine, timestamp, printf, colorize, errors, json } = winston.format;
 
-// Logger configuration constants
+// Configuration constants
 const VALID_LOG_LEVELS = ['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly'] as const;
 const DEFAULT_LOG_LEVEL = 'info';
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const MAX_FILES = 5;
 const LOG_DIR = 'logs';
 
-// Type definitions for better type safety
 type LogLevel = typeof VALID_LOG_LEVELS[number];
 
 /**
- * Validates that the log level is supported by Winston
+ * Validates log level and returns default if invalid
  * 
  * @param level - Log level to validate
- * @returns Validated log level or default if invalid
+ * @returns Validated log level
  */
 function validateLogLevel(level: string): LogLevel {
   const normalizedLevel = level.toLowerCase().trim() as LogLevel;
   
   if (!VALID_LOG_LEVELS.includes(normalizedLevel)) {
-    // Use Winston's default logger to avoid console usage
     winston.warn(`[logger] Invalid log level '${level}', falling back to '${DEFAULT_LOG_LEVEL}'`);
     return DEFAULT_LOG_LEVEL;
   }
@@ -32,10 +30,7 @@ function validateLogLevel(level: string): LogLevel {
   return normalizedLevel;
 }
 
-/**
- * Creates a human-readable format for development
- * Includes colorized output, timestamps, and stack traces
- */
+// Format configurations
 const devFormat = combine(
   errors({ stack: true }),
   timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
@@ -47,10 +42,6 @@ const devFormat = combine(
   })
 );
 
-/**
- * Creates a structured JSON format for production
- * Optimized for log aggregation and analysis
- */
 const prodFormat = combine(
   errors({ stack: true }),
   timestamp(),
@@ -58,73 +49,53 @@ const prodFormat = combine(
 );
 
 /**
- * Creates appropriate transports based on environment
+ * Creates Winston transports based on environment
  * 
- * @returns Array of Winston transports configured for the current environment
+ * @returns Array of configured transports
  */
 function createTransports(): winston.transport[] {
-  const transports: winston.transport[] = [];
-  
-  // Console transport for all environments
-  const consoleTransport = new winston.transports.Console({
-    format: env.NODE_ENV === 'production' ? prodFormat : devFormat,
-    handleExceptions: true,
-    handleRejections: true,
-  });
-  
-  transports.push(consoleTransport);
-  
-  // File transports for production
-  if (env.NODE_ENV === 'production') {
-    // Error log file
-    const errorFileTransport = new winston.transports.File({
-      filename: `${LOG_DIR}/error.log`,
-      level: 'error',
-      format: prodFormat,
-      maxsize: MAX_FILE_SIZE,
-      maxFiles: MAX_FILES,
+  const transports: winston.transport[] = [
+    new winston.transports.Console({
+      format: env.NODE_ENV === 'production' ? prodFormat : devFormat,
       handleExceptions: true,
       handleRejections: true,
-    });
-    
-    // Combined log file
-    const combinedFileTransport = new winston.transports.File({
-      filename: `${LOG_DIR}/combined.log`,
-      format: prodFormat,
-      maxsize: MAX_FILE_SIZE,
-      maxFiles: MAX_FILES,
-    });
-    
-    transports.push(errorFileTransport, combinedFileTransport);
+    })
+  ];
+  
+  if (env.NODE_ENV === 'production') {
+    transports.push(
+      new winston.transports.File({
+        filename: `${LOG_DIR}/error.log`,
+        level: 'error',
+        format: prodFormat,
+        maxsize: MAX_FILE_SIZE,
+        maxFiles: MAX_FILES,
+        handleExceptions: true,
+        handleRejections: true,
+      }),
+      new winston.transports.File({
+        filename: `${LOG_DIR}/combined.log`,
+        format: prodFormat,
+        maxsize: MAX_FILE_SIZE,
+        maxFiles: MAX_FILES,
+      })
+    );
   }
   
   return transports;
 }
 
-/**
- * Creates and configures the Winston logger instance
- * 
- * @returns Configured Winston logger instance
- */
-function createLogger(): winston.Logger {
-  const validatedLevel = validateLogLevel(env.LOG_LEVEL);
-  
-  const logger = winston.createLogger({
-    level: validatedLevel,
-    format: env.NODE_ENV === 'production' ? prodFormat : devFormat,
-    transports: createTransports(),
-    exitOnError: false,
-    silent: false,
-  });
-  
-  return logger;
-}
-
-// Create the logger instance
-export const logger = createLogger();
+// Create logger instance
+export const logger = winston.createLogger({
+  level: validateLogLevel(env.LOG_LEVEL),
+  format: env.NODE_ENV === 'production' ? prodFormat : devFormat,
+  transports: createTransports(),
+  exitOnError: false,
+  silent: false,
+});
 
 /**
- * Logs HTTP request information with structured data
+ * Logs HTTP request information
  * 
  * @param req - Express request object
  * @param res - Express response object
@@ -142,10 +113,10 @@ export const logRequest = (req: any, res: any, responseTime: number): void => {
 };
 
 /**
- * Logs application errors with context information
+ * Logs application errors with context
  * 
  * @param error - Error object to log
- * @param context - Optional context data to include with the error
+ * @param context - Optional context data
  */
 export const logError = (error: Error, context?: Record<string, any>): void => {
   logger.error('Application Error', {

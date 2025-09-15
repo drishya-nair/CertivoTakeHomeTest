@@ -9,52 +9,38 @@ import env from "@/config/env";
 import { createError } from "@/middleware/errorHandler";
 import logger from "../logger";
 
-// File system constants
+// File system setup
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-/**
- * Data directory configuration
- * 
- * Uses custom DATA_DIR from environment if provided,
- * otherwise defaults to the relative data directory
- */
 const dataDir = env.DATA_DIR
   ? path.resolve(env.DATA_DIR)
   : path.resolve(__dirname, "..", "..", "..", "data");
 
-/**
- * File path for BOM JSON data file
- */
 const bomPath = path.join(dataDir, "bom.json");
-/**
- * File path for compliance CSV data file
- */
 const complianceCsvPath = path.join(dataDir, "compliance.csv");
 
-/**
- * Zod validation schemas
- */
+// Validation schemas
 const BomDataSchema = z.object({
-  bom_id: z.string().min(1, "BOM ID is required"),
-  product_name: z.string().min(1, "Product name is required"),
+  bom_id: z.string().min(1),
+  product_name: z.string().min(1),
   parts: z.array(z.object({
-    part_number: z.string().min(1, "Part number is required"),
-    weight_g: z.number().positive("Weight must be positive"),
+    part_number: z.string().min(1),
+    weight_g: z.number().positive(),
     description: z.string().optional(),
   })),
 });
 
 const ComplianceEntrySchema = z.object({
-  part_number: z.string().min(1, "Part number is required"),
-  substance: z.string().min(1, "Substance is required"),
-  threshold_ppm: z.number().min(0, "Threshold must be non-negative"),
+  part_number: z.string().min(1),
+  substance: z.string().min(1),
+  threshold_ppm: z.number().min(0),
 });
 
 /**
- * Reads and parses BOM JSON data
+ * Reads and parses BOM JSON data with validation
  * 
- * @returns Promise<BomData> - Parsed BOM data
+ * @returns Promise<BomData> - Parsed and validated BOM data
  */
 export async function readBomJson(): Promise<BomData> {
   if (!fs.existsSync(bomPath)) {
@@ -65,12 +51,9 @@ export async function readBomJson(): Promise<BomData> {
   try {
     const raw = await fs.promises.readFile(bomPath, "utf-8");
     const parsed = JSON.parse(raw);
-    
-    // Validate with Zod schema
-    const validatedData = BomDataSchema.parse(parsed);
-    return validatedData as BomData;
+    return BomDataSchema.parse(parsed) as BomData;
   } catch (error) {
-    logger.error(`Failed to read BOM JSON:`, error);
+    logger.error("Failed to read BOM JSON:", error);
     
     if (error instanceof SyntaxError) {
       throw createError("Invalid BOM JSON format", 422);
@@ -103,7 +86,7 @@ export async function readCompliance(): Promise<ComplianceEntry[]> {
 }
 
 /**
- * Parses CSV file into ComplianceEntry array
+ * Parses CSV file into ComplianceEntry array with validation
  * 
  * @param filePath - Path to the CSV file to parse
  * @returns Promise<ComplianceEntry[]> - Array of compliance entries
@@ -112,24 +95,19 @@ async function readComplianceCsv(filePath: string): Promise<ComplianceEntry[]> {
   return new Promise((resolve, reject) => {
     const results: ComplianceEntry[] = [];
 
-    const stream = fs.createReadStream(filePath, { encoding: 'utf8' });
-    
-    stream
+    fs.createReadStream(filePath, { encoding: 'utf8' })
       .pipe(csv())
       .on("data", (data: Record<string, unknown>) => {
         try {
-          // Parse and validate each CSV row
           const parsedData = {
             part_number: String(data.part_number || '').trim(),
             substance: String(data.substance || '').trim(),
             threshold_ppm: Number(data.threshold_ppm || 0),
           };
 
-          const validatedEntry = ComplianceEntrySchema.parse(parsedData);
-          results.push(validatedEntry);
+          results.push(ComplianceEntrySchema.parse(parsedData));
         } catch (error) {
-          // Skip invalid rows but log the issue
-          logger.warn(`Skipping invalid compliance entry:`, { data, error });
+          logger.warn("Skipping invalid compliance entry:", { data, error });
         }
       })
       .on("end", () => {
@@ -141,7 +119,7 @@ async function readComplianceCsv(filePath: string): Promise<ComplianceEntry[]> {
         resolve(results);
       })
       .on("error", (err: NodeJS.ErrnoException) => {
-        logger.error(`Failed to read compliance CSV:`, err);
+        logger.error("Failed to read compliance CSV:", err);
         reject(createError("Failed to read compliance CSV file", 500));
       });
   });
