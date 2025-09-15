@@ -2,6 +2,7 @@ import type { MergedComponent } from "@certivo/shared-types";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import StatusIndicator from "./StatusIndicator";
+import LoadingSpinner from "./ui/LoadingSpinner";
 
 interface ComplianceTableProps {
   rows: MergedComponent[];
@@ -9,23 +10,7 @@ interface ComplianceTableProps {
   error?: string;
 }
 
-// Table cell components for consistent styling
-const Th = ({ children }: { children: React.ReactNode }) => (
-  <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
-    {children}
-  </th>
-);
 
-const Td = ({ children }: { children: React.ReactNode }) => (
-  <td className="px-3 py-2 text-gray-800 dark:text-gray-200">
-    {children}
-  </td>
-);
-
-// Loading and error states
-const LoadingState = () => (
-  <div className="animate-pulse text-sm text-gray-500">Loading…</div>
-);
 
 const ErrorState = ({ error }: { error: string }) => (
   <div className="text-red-600">{error}</div>
@@ -49,7 +34,7 @@ export default function ComplianceTable({ rows, loading, error }: ComplianceTabl
 
   // Early returns for loading and error states
   if (error) return <ErrorState error={error} />;
-  if (loading) return <LoadingState />;
+  if (loading) return <LoadingSpinner text="Loading..." className="text-sm text-gray-500" />;
   
   return (
     <div className="overflow-x-auto rounded border border-gray-200 dark:border-neutral-800">
@@ -60,12 +45,12 @@ export default function ComplianceTable({ rows, loading, error }: ComplianceTabl
       >
         <thead className="bg-gray-50 dark:bg-neutral-900">
           <tr>
-            <Th>Part</Th>
-            <Th>Material</Th>
-            <Th>Substance</Th>
-            <Th>Mass</Th>
-            <Th>Threshold (ppm)</Th>
-            <Th>Status</Th>
+            <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Part</th>
+            <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Material</th>
+            <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Substance</th>
+            <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Mass</th>
+            <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Threshold (ppm)</th>
+            <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Status</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200 dark:divide-neutral-800">
@@ -79,14 +64,14 @@ export default function ComplianceTable({ rows, loading, error }: ComplianceTabl
               role="button"
               aria-label={`View details for component ${row.id}`}
             >
-              <Td>{row.id}</Td>
-              <Td>{row.material}</Td>
-              <Td>{row.substance ?? "—"}</Td>
-              <Td>{row.mass}</Td>
-              <Td>{row.threshold_ppm ?? "—"}</Td>
-              <Td>
+              <td className="px-3 py-2 text-gray-800 dark:text-gray-200">{row.id}</td>
+              <td className="px-3 py-2 text-gray-800 dark:text-gray-200">{row.material}</td>
+              <td className="px-3 py-2 text-gray-800 dark:text-gray-200">{row.substance ?? "—"}</td>
+              <td className="px-3 py-2 text-gray-800 dark:text-gray-200">{row.mass}</td>
+              <td className="px-3 py-2 text-gray-800 dark:text-gray-200">{row.threshold_ppm ?? "—"}</td>
+              <td className="px-3 py-2 text-gray-800 dark:text-gray-200">
                 <StatusIndicator status={row.status} />
-              </Td>
+              </td>
             </tr>
           ))}
         </tbody>

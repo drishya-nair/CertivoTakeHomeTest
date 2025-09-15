@@ -6,6 +6,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Button from "@/components/ui/Button";
 import Icon from "@/components/ui/Icon";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { ERROR_MESSAGES } from "@/lib/constants";
 
 // Reusable field component to reduce repetition
@@ -51,15 +52,6 @@ function StatusBadge({ status }: StatusBadgeProps) {
   );
 }
 
-// Loading spinner component
-function LoadingSpinner() {
-  return (
-    <div className="flex items-center justify-center py-8">
-      <Icon name="loading" size={32} className="animate-spin text-indigo-600" />
-      <span className="ml-2 text-gray-600 dark:text-gray-400">Loading...</span>
-    </div>
-  );
-}
 
 // Not found component
 function NotFoundComponent({ onBack }: { onBack: () => void }) {
@@ -120,7 +112,9 @@ export default function DetailsPage() {
         
         <ErrorBoundary>
           {loading ? (
-            <LoadingSpinner />
+            <div className="py-8">
+              <LoadingSpinner size={32} text="Loading..." className="text-indigo-600" />
+            </div>
           ) : component ? (
             <div className="max-w-4xl mx-auto">
               {/* Header */}

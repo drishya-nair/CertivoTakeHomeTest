@@ -8,36 +8,8 @@ import { loginSchema, type LoginFormData, logValidationError } from "@/lib/valid
 import { DEMO_CREDENTIALS, ERROR_MESSAGES } from "@/lib/constants";
 import { extractErrorMessage, logError } from "@/lib/errorHandling";
 import Icon from "@/components/ui/Icon";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
-// Form input component for consistent styling
-interface FormInputProps {
-  id: string;
-  label: string;
-  type: string;
-  placeholder: string;
-  error?: string;
-  disabled: boolean;
-  register: any;
-}
-
-const FormInput = ({ id, label, type, placeholder, error, disabled, register }: FormInputProps) => (
-  <div>
-    <label htmlFor={id} className="block text-sm font-medium text-slate-200 mb-2">
-      {label}
-    </label>
-    <input
-      id={id}
-      type={type}
-      className={`w-full px-4 py-3 bg-slate-700/50 border rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
-        error ? "border-red-500" : "border-slate-600"
-      }`}
-      placeholder={placeholder}
-      disabled={disabled}
-      {...register(id)}
-    />
-    {error && <p className="mt-1 text-sm text-red-400">{error}</p>}
-  </div>
-);
 
 // Demo credentials component
 const DemoCredentials = () => (
@@ -63,13 +35,6 @@ const ErrorMessage = ({ message }: { message: string }) => (
   </div>
 );
 
-// Loading spinner component
-const LoadingSpinner = () => (
-  <div className="flex items-center justify-center">
-    <Icon name="loading" size={20} className="animate-spin text-white mr-3" />
-    Signing in...
-  </div>
-);
 
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -127,24 +92,38 @@ export default function LoginForm() {
           {/* Form */}
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div className="space-y-4">
-              <FormInput
-                id="username"
-                label="Username"
-                type="text"
-                placeholder="Enter your username"
-                error={errors.username?.message}
-                disabled={isLoading}
-                register={register}
-              />
-              <FormInput
-                id="password"
-                label="Password"
-                type="password"
-                placeholder="Enter your password"
-                error={errors.password?.message}
-                disabled={isLoading}
-                register={register}
-              />
+              <div>
+                <label htmlFor="username" className="block text-sm font-medium text-slate-200 mb-2">
+                  Username
+                </label>
+                <input
+                  id="username"
+                  type="text"
+                  className={`w-full px-4 py-3 bg-slate-700/50 border rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                    errors.username?.message ? "border-red-500" : "border-slate-600"
+                  }`}
+                  placeholder="Enter your username"
+                  disabled={isLoading}
+                  {...register("username")}
+                />
+                {errors.username?.message && <p className="mt-1 text-sm text-red-400">{errors.username.message}</p>}
+              </div>
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-slate-200 mb-2">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  className={`w-full px-4 py-3 bg-slate-700/50 border rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                    errors.password?.message ? "border-red-500" : "border-slate-600"
+                  }`}
+                  placeholder="Enter your password"
+                  disabled={isLoading}
+                  {...register("password")}
+                />
+                {errors.password?.message && <p className="mt-1 text-sm text-red-400">{errors.password.message}</p>}
+              </div>
             </div>
 
             {error && <ErrorMessage message={error} />}
@@ -154,7 +133,7 @@ export default function LoginForm() {
               disabled={isLoading}
               className="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium py-3 px-6 rounded-lg border border-gray-600 hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isLoading ? <LoadingSpinner /> : "Sign In"}
+              {isLoading ? <LoadingSpinner text="Signing in..." className="text-white" /> : "Sign In"}
             </button>
           </form>
         </div>
