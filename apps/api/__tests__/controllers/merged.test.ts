@@ -26,6 +26,15 @@ describe("Merged Controller", () => {
     authToken = response.body.token;
   });
 
+  afterAll(async () => {
+    // Clean up test data directory
+    try {
+      await fs.promises.rm(dataDir, { recursive: true, force: true });
+    } catch (error) {
+      // Ignore cleanup errors
+    }
+  });
+
   beforeEach(async () => {
     // Ensure test data directory exists and set environment
     const testDataDir = ensureDataDirForTests();
@@ -42,7 +51,7 @@ describe("Merged Controller", () => {
     };
 
     // Create test compliance data
-    const testComplianceData = "part_number,substance,threshold_ppm\nP-1001,Lead,1000\nP-1002,BPA,500\nP-1003,Cadmium,200";
+    const testComplianceData = "part_number,substance,threshold_ppm,substance_mass_mg\nP-1001,Lead,1000,15\nP-1002,BPA,500,8\nP-1003,Cadmium,200,0.6";
     
     await fs.promises.writeFile(
       path.join(testDataDir, "bom.json"),
@@ -91,7 +100,7 @@ describe("Merged Controller", () => {
       expect(p1001).toBeDefined();
       expect(p1001.substance).toBe("Lead");
       expect(p1001.threshold_ppm).toBe(1000);
-      expect(p1001.status).toBe("Non-Compliant"); // Lead is not BPA
+      expect(p1001.status).toBe("Compliant"); // Lead PPM (300) <= threshold (1000)
       expect(p1001.mass).toBe("50g");
       
       // Find P-1002 (should have BPA substance)
@@ -99,7 +108,7 @@ describe("Merged Controller", () => {
       expect(p1002).toBeDefined();
       expect(p1002.substance).toBe("BPA");
       expect(p1002.threshold_ppm).toBe(500);
-      expect(p1002.status).toBe("Compliant"); // BPA is allowed
+      expect(p1002.status).toBe("Compliant"); // BPA PPM (320) <= threshold (500)
       expect(p1002.mass).toBe("25g");
       
       // Find P-1003 (should have Cadmium substance)
@@ -107,7 +116,7 @@ describe("Merged Controller", () => {
       expect(p1003).toBeDefined();
       expect(p1003.substance).toBe("Cadmium");
       expect(p1003.threshold_ppm).toBe(200);
-      expect(p1003.status).toBe("Non-Compliant"); // Cadmium is not BPA
+      expect(p1003.status).toBe("Compliant"); // Cadmium PPM (8) <= threshold (200)
       expect(p1003.mass).toBe("75g");
     });
 
@@ -241,7 +250,7 @@ describe("Merged Controller", () => {
       };
 
       // Create compliance data with uppercase part numbers
-      const testComplianceData = "part_number,substance,threshold_ppm\nP-1001,Lead,1000";
+      const testComplianceData = "part_number,substance,threshold_ppm,substance_mass_mg\nP-1001,Lead,1000,15";
       
       await fs.promises.writeFile(
         path.join(dataDir, "bom.json"),
@@ -264,7 +273,7 @@ describe("Merged Controller", () => {
       
       expect(component).toBeDefined();
       expect(component.substance).toBe("Lead");
-      expect(component.status).toBe("Non-Compliant");
+      expect(component.status).toBe("Compliant"); // Lead PPM (300) <= threshold (1000)
     });
 
     it("should handle whitespace in part numbers", async () => {
@@ -280,7 +289,7 @@ describe("Merged Controller", () => {
       };
 
       // Create compliance data with part numbers containing whitespace
-      const testComplianceData = "part_number,substance,threshold_ppm\n P-1001 ,Lead,1000";
+      const testComplianceData = "part_number,substance,threshold_ppm,substance_mass_mg\n P-1001 ,Lead,1000,15";
       
       await fs.promises.writeFile(
         path.join(testDataDir, "bom.json"),
@@ -303,7 +312,7 @@ describe("Merged Controller", () => {
       
       expect(component).toBeDefined();
       expect(component.substance).toBe("Lead");
-      expect(component.status).toBe("Non-Compliant");
+      expect(component.status).toBe("Compliant"); // Lead PPM (300) <= threshold (1000)
     });
   });
 });

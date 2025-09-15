@@ -38,6 +38,15 @@ beforeAll(async () => {
   );
 });
 
+afterAll(async () => {
+  // Clean up test data directory
+  try {
+    await fs.promises.rm(dataDir, { recursive: true, force: true });
+  } catch (error) {
+    // Ignore cleanup errors
+  }
+});
+
 describe("API", () => {
   it("authenticates and returns merged data", async () => {
     const token = await login();

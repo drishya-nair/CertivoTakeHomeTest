@@ -41,6 +41,15 @@ describe("API Integration Tests", () => {
     );
   });
 
+  afterAll(async () => {
+    // Clean up test data directory
+    try {
+      await fs.promises.rm(dataDir, { recursive: true, force: true });
+    } catch (error) {
+      // Ignore cleanup errors
+    }
+  });
+
   beforeEach(async () => {
     // Login before each test
     const response = await request(app)
