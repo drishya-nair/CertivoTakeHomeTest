@@ -1,23 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { loginSchema, type LoginFormData, logValidationError } from "@/lib/validation";
 
 export default function LoginForm() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const { login } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+    },
+  });
+
+  // Log validation errors when they occur
+  useEffect(() => {
+    Object.entries(errors).forEach(([field, error]) => {
+      if (error?.message) {
+        logValidationError(field, error.message);
+      }
+    });
+  }, [errors]);
+
+  const onSubmit = async (data: LoginFormData) => {
     setError("");
     setIsLoading(true);
 
     try {
-      await login(username, password);
+      await login(data.username, data.password);
     } catch (err) {
+      console.error("[Login Error]", err);
       setError("Invalid username or password");
     } finally {
       setIsLoading(false);
@@ -59,7 +81,7 @@ export default function LoginForm() {
           </div>
 
           {/* Form */}
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div className="space-y-4">
               <div>
                 <label htmlFor="username" className="block text-sm font-medium text-slate-200 mb-2">
@@ -67,15 +89,17 @@ export default function LoginForm() {
                 </label>
                 <input
                   id="username"
-                  name="username"
                   type="text"
-                  required
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className={`w-full px-4 py-3 bg-slate-700/50 border rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                    errors.username ? "border-red-500" : "border-slate-600"
+                  }`}
                   placeholder="Enter your username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
                   disabled={isLoading}
+                  {...register("username")}
                 />
+                {errors.username && (
+                  <p className="mt-1 text-sm text-red-400">{errors.username.message}</p>
+                )}
               </div>
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-slate-200 mb-2">
@@ -83,15 +107,17 @@ export default function LoginForm() {
                 </label>
                 <input
                   id="password"
-                  name="password"
                   type="password"
-                  required
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className={`w-full px-4 py-3 bg-slate-700/50 border rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                    errors.password ? "border-red-500" : "border-slate-600"
+                  }`}
                   placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                   disabled={isLoading}
+                  {...register("password")}
                 />
+                {errors.password && (
+                  <p className="mt-1 text-sm text-red-400">{errors.password.message}</p>
+                )}
               </div>
             </div>
 
