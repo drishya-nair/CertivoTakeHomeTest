@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useMemo } from "react";
 import Chart from "chart.js/auto";
 import { CHART_COLORS, CHART_LABELS } from "@/lib/constants";
 
@@ -26,13 +26,13 @@ export default function ComplianceChart({ compliant, non, unknown }: ComplianceC
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
 
-  // Memoized data for better performance
-  const chartData = [compliant, non, unknown];
-  const backgroundColors = [
+  // Memoized data for better performance - only recreate when props change
+  const chartData = useMemo(() => [compliant, non, unknown], [compliant, non, unknown]);
+  const backgroundColors = useMemo(() => [
     CHART_COLORS.COMPLIANT,
     CHART_COLORS.NON_COMPLIANT,
     CHART_COLORS.UNKNOWN,
-  ];
+  ], []);
 
   // Initialize chart
   const initializeChart = useCallback(() => {
