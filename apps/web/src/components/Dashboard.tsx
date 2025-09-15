@@ -13,9 +13,9 @@ import Button from "@/components/ui/Button";
 
 // Header component for better organization
 const DashboardHeader = ({ onLogout }: { onLogout: () => void }) => (
-  <div className="flex items-center justify-between gap-4">
-    <h1 className="text-3xl font-semibold">Compliance Dashboard</h1>
-    <div className="flex items-center gap-3">
+  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <h1 className="text-2xl sm:text-3xl font-semibold">Compliance Dashboard</h1>
+    <div className="flex items-center gap-3 justify-end">
       <Button
         onClick={onLogout}
         variant="secondary"
@@ -44,9 +44,16 @@ const DashboardContent = ({
   error?: string;
   stats: { total: number; compliant: number; non: number; unknown: number };
 }) => (
-  <div className="mt-6 grid gap-6 md:grid-cols-3">
-    <div className="md:col-span-2">
-      <div className="flex items-center gap-3 mb-3">
+  <div className="mt-6 space-y-6">
+    {/* Mobile: Vertical layout - Stats and Chart first, then Search and Table */}
+    <div className="block md:hidden space-y-4">
+      <StatsCard stats={stats} />
+      <ComplianceChart 
+        compliant={stats.compliant} 
+        non={stats.non} 
+        unknown={stats.unknown} 
+      />
+      <div className="flex items-center gap-3">
         <SearchBar
           value={filter}
           onChange={onFilterChange}
@@ -56,13 +63,51 @@ const DashboardContent = ({
       </div>
       <ComplianceTable loading={loading} error={error} rows={filteredRows} />
     </div>
-    <div className="space-y-4">
-      <StatsCard stats={stats} />
-      <ComplianceChart 
-        compliant={stats.compliant} 
-        non={stats.non} 
-        unknown={stats.unknown} 
-      />
+
+    {/* Medium screens: Stats and Chart in one row, Table below */}
+    <div className="hidden md:block lg:hidden space-y-6">
+      <div className="grid grid-cols-2 gap-4">
+        <StatsCard stats={stats} />
+        <ComplianceChart 
+          compliant={stats.compliant} 
+          non={stats.non} 
+          unknown={stats.unknown} 
+        />
+      </div>
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <SearchBar
+            value={filter}
+            onChange={onFilterChange}
+            placeholder="Search by part or status..."
+            className="w-full"
+          />
+        </div>
+        <ComplianceTable loading={loading} error={error} rows={filteredRows} />
+      </div>
+    </div>
+
+    {/* Large screens: Original layout preserved */}
+    <div className="hidden lg:grid lg:grid-cols-3 lg:gap-6">
+      <div className="lg:col-span-2">
+        <div className="flex items-center gap-3 mb-3">
+          <SearchBar
+            value={filter}
+            onChange={onFilterChange}
+            placeholder="Search by part or status..."
+            className="w-full"
+          />
+        </div>
+        <ComplianceTable loading={loading} error={error} rows={filteredRows} />
+      </div>
+      <div className="space-y-4">
+        <StatsCard stats={stats} />
+        <ComplianceChart 
+          compliant={stats.compliant} 
+          non={stats.non} 
+          unknown={stats.unknown} 
+        />
+      </div>
     </div>
   </div>
 );
@@ -113,7 +158,7 @@ export default function Dashboard() {
   }, [merged?.components]);
 
   return (
-    <main className="min-h-screen p-6 md:p-10 bg-white text-gray-900 dark:bg-neutral-950 dark:text-gray-100">
+    <main className="min-h-screen p-4 sm:p-6 md:p-10 bg-white text-gray-900 dark:bg-neutral-950 dark:text-gray-100">
       <DashboardHeader onLogout={logout} />
       
       <ErrorBoundary>

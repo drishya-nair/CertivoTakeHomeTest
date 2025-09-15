@@ -38,19 +38,20 @@ export default function ComplianceTable({ rows, loading, error }: ComplianceTabl
   
   return (
     <div className="overflow-x-auto rounded border border-gray-200 dark:border-neutral-800">
-      <table 
-        className="min-w-full divide-y divide-gray-200 dark:divide-neutral-800 text-sm" 
-        role="table" 
-        aria-label="Compliance data table"
-      >
+      <div className="min-w-full">
+        <table 
+          className="min-w-full divide-y divide-gray-200 dark:divide-neutral-800 text-sm" 
+          role="table" 
+          aria-label="Compliance data table"
+        >
         <thead className="bg-gray-50 dark:bg-neutral-900">
           <tr>
-            <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Part</th>
-            <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Material</th>
-            <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Substance</th>
-            <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Mass</th>
-            <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Threshold (ppm)</th>
-            <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Status</th>
+            <th className="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Part</th>
+            <th className="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Material</th>
+            <th className="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Substance</th>
+            <th className="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Mass</th>
+            <th className="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Threshold (ppm)</th>
+            <th className="px-4 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Status</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200 dark:divide-neutral-800">
@@ -64,18 +65,19 @@ export default function ComplianceTable({ rows, loading, error }: ComplianceTabl
               role="button"
               aria-label={`View details for component ${row.id}`}
             >
-              <td className="px-3 py-2 text-gray-800 dark:text-gray-200">{row.id}</td>
-              <td className="px-3 py-2 text-gray-800 dark:text-gray-200">{row.material}</td>
-              <td className="px-3 py-2 text-gray-800 dark:text-gray-200">{row.substance ?? "—"}</td>
-              <td className="px-3 py-2 text-gray-800 dark:text-gray-200">{row.mass}</td>
-              <td className="px-3 py-2 text-gray-800 dark:text-gray-200">{row.threshold_ppm ?? "—"}</td>
-              <td className="px-3 py-2 text-gray-800 dark:text-gray-200">
+              <td className="px-4 py-2 text-gray-800 dark:text-gray-200">{row.id}</td>
+              <td className="px-4 py-2 text-gray-800 dark:text-gray-200">{row.material}</td>
+              <td className="px-4 py-2 text-gray-800 dark:text-gray-200">{row.substance ?? "—"}</td>
+              <td className="px-4 py-2 text-gray-800 dark:text-gray-200">{row.mass}</td>
+              <td className="px-4 py-2 text-gray-800 dark:text-gray-200">{row.threshold_ppm ?? "—"}</td>
+              <td className="px-4 py-2 text-gray-800 dark:text-gray-200">
                 <StatusIndicator status={row.status} />
               </td>
             </tr>
           ))}
         </tbody>
-      </table>
+        </table>
+      </div>
     </div>
   );
 }
