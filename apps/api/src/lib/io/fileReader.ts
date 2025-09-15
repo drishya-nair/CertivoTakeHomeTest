@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import csv from "csv-parser";
 import { fileURLToPath } from "url";
+import { z } from "zod";
 
 import { BomData, ComplianceEntry } from "@certivo/shared-types";
 import env from "@/config/env";
@@ -32,6 +33,25 @@ const bomPath = path.join(dataDir, "bom.json");
 const complianceCsvPath = path.join(dataDir, "compliance.csv");
 
 /**
+ * Zod validation schemas
+ */
+const BomDataSchema = z.object({
+  bom_id: z.string().min(1, "BOM ID is required"),
+  product_name: z.string().min(1, "Product name is required"),
+  parts: z.array(z.object({
+    part_number: z.string().min(1, "Part number is required"),
+    weight_g: z.number().positive("Weight must be positive"),
+    description: z.string().optional(),
+  })),
+});
+
+const ComplianceEntrySchema = z.object({
+  part_number: z.string().min(1, "Part number is required"),
+  substance: z.string().min(1, "Substance is required"),
+  threshold_ppm: z.number().min(0, "Threshold must be non-negative"),
+});
+
+/**
  * Reads and parses BOM JSON data
  * 
  * @returns Promise<BomData> - Parsed BOM data
@@ -46,17 +66,18 @@ export async function readBomJson(): Promise<BomData> {
     const raw = await fs.promises.readFile(bomPath, "utf-8");
     const parsed = JSON.parse(raw);
     
-    // Basic validation
-    if (!parsed || !Array.isArray(parsed.parts) || !parsed.bom_id || !parsed.product_name) {
-      throw createError("Invalid BOM JSON format", 422);
-    }
-
-    return parsed as BomData;
+    // Validate with Zod schema
+    const validatedData = BomDataSchema.parse(parsed);
+    return validatedData as BomData;
   } catch (error) {
     logger.error(`Failed to read BOM JSON:`, error);
     
     if (error instanceof SyntaxError) {
       throw createError("Invalid BOM JSON format", 422);
+    }
+    
+    if (error instanceof z.ZodError) {
+      throw createError("Invalid BOM data structure", 422);
     }
     
     if ((error as any).statusCode) {
@@ -96,20 +117,19 @@ async function readComplianceCsv(filePath: string): Promise<ComplianceEntry[]> {
     stream
       .pipe(csv())
       .on("data", (data: Record<string, unknown>) => {
-        // Simple validation and parsing
-        const partNumber = data.part_number;
-        const substance = data.substance;
-        const thresholdPpm = data.threshold_ppm;
+        try {
+          // Parse and validate each CSV row
+          const parsedData = {
+            part_number: String(data.part_number || '').trim(),
+            substance: String(data.substance || '').trim(),
+            threshold_ppm: Number(data.threshold_ppm || 0),
+          };
 
-        if (typeof partNumber === 'string' && typeof substance === 'string' && typeof thresholdPpm === 'string') {
-          const threshold = Number(thresholdPpm);
-          if (!isNaN(threshold) && threshold >= 0) {
-            results.push({
-              part_number: partNumber.trim(),
-              substance: substance.trim(),
-              threshold_ppm: threshold,
-            });
-          }
+          const validatedEntry = ComplianceEntrySchema.parse(parsedData);
+          results.push(validatedEntry);
+        } catch (error) {
+          // Skip invalid rows but log the issue
+          logger.warn(`Skipping invalid compliance entry:`, { data, error });
         }
       })
       .on("end", () => {

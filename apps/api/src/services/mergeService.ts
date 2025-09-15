@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { BomData, ComplianceEntry, MergedComponent, MergedResponse } from "@certivo/shared-types";
 
 import { createError } from "@/middleware/errorHandler";
@@ -7,6 +8,24 @@ import { ComplianceService } from "./complianceService";
 // Business logic constants
 const ALLOWED_SUBSTANCE = "bpa";
 const MASS_UNIT = "g";
+
+/**
+ * Zod validation schemas for merge service
+ */
+const BomDataSchema = z.object({
+  product_name: z.string().min(1),
+  parts: z.array(z.object({
+    part_number: z.string().min(1),
+    weight_g: z.number().positive(),
+    material: z.string().optional(),
+  })),
+});
+
+const ComplianceEntryArraySchema = z.array(z.object({
+  part_number: z.string().min(1),
+  substance: z.string().min(1),
+  threshold_ppm: z.number().min(0),
+}));
 
 /**
  * Service for merging BOM and compliance data
@@ -64,19 +83,21 @@ export class MergeService {
   }
 
   /**
-   * Validates input data structure
+   * Validates input data structure using Zod schemas
    * 
    * @param bom - BOM data to validate
    * @param compliance - Compliance data to validate
    * @throws {Error} 422 if validation fails
    */
   private static validateInputData(bom: BomData, compliance: ComplianceEntry[]): void {
-    if (!bom || !bom.parts || !Array.isArray(bom.parts)) {
-      throw createError("Invalid BOM data structure", 422);
-    }
-    
-    if (!compliance || !Array.isArray(compliance)) {
-      throw createError("Invalid compliance data structure", 422);
+    try {
+      BomDataSchema.parse(bom);
+      ComplianceEntryArraySchema.parse(compliance);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        throw createError("Invalid data structure", 422);
+      }
+      throw error;
     }
   }
 

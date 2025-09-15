@@ -6,19 +6,16 @@ import env from "@/config/env";
 import { createError } from "@/middleware/errorHandler";
 import logger from "@/lib/logger";
 
-// Constants for security and validation
-const MAX_INPUT_LENGTH = 256;
+// Constants for security
 const TOKEN_EXPIRY = "2h";
 const JWT_ALGORITHM = "HS256" as const;
 
-// Type definitions for better type safety
+// Type definitions
 /**
- * Request payload for user login
+ * Request payload for user login (validated by Zod middleware)
  */
 interface LoginRequest {
-  /** Username for authentication */
   username: string;
-  /** Password for authentication */
   password: string;
 }
 
@@ -26,7 +23,6 @@ interface LoginRequest {
  * Response payload for successful login
  */
 interface LoginResponse {
-  /** JWT token for authenticated requests */
   token: string;
 }
 
@@ -34,48 +30,9 @@ interface LoginResponse {
  * JWT token payload structure
  */
 interface JwtPayload {
-  /** Subject (username) identifier */
   sub: string;
-  /** Issued at timestamp */
   iat?: number;
-  /** Expiration timestamp */
   exp?: number;
-}
-
-/**
- * Validates login request input with comprehensive checks
- * 
- * @param body - Raw request body to validate
- * @returns Validated LoginRequest object
- * @throws {Error} 400 if validation fails
- */
-function validateLoginInput(body: unknown): LoginRequest {
-  if (!body || typeof body !== "object") {
-    throw createError("Invalid request body", 400);
-  }
-
-  const { username, password } = body as Record<string, unknown>;
-
-  if (typeof username !== "string" || typeof password !== "string") {
-    throw createError("Invalid request body", 400);
-  }
-
-  // Trim whitespace and validate length
-  const trimmedUsername = username.trim();
-  const trimmedPassword = password.trim();
-
-  if (!trimmedUsername || !trimmedPassword) {
-    throw createError("Invalid request body", 400);
-  }
-
-  if (trimmedUsername.length > MAX_INPUT_LENGTH || trimmedPassword.length > MAX_INPUT_LENGTH) {
-    throw createError("Invalid request body", 400);
-  }
-
-  return {
-    username: trimmedUsername,
-    password: trimmedPassword,
-  };
 }
 
 /**
@@ -127,15 +84,15 @@ function generateToken(username: string): string {
  * Security features:
  * - Constant-time credential comparison to prevent timing attacks
  * - Generic error messages to prevent user enumeration
- * - Input validation and sanitization
+ * - Input validation handled by Zod middleware
  * - Proper JWT token generation with secure defaults
  * 
- * @param req - Express request object containing login credentials
+ * @param req - Express request object containing validated login credentials
  * @param res - Express response object for sending authentication response
  * @returns Promise<void>
  */
 export async function login(req: Request, res: Response): Promise<void> {
-  const { username, password } = validateLoginInput(req.body);
+  const { username, password } = req.body as LoginRequest;
 
   if (!verifyCredentials(username, password)) {
     throw createError("Invalid credentials", 401);
