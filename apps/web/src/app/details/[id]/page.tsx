@@ -1,42 +1,133 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useComplianceStore } from "@/stores/complianceStore";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Button from "@/components/ui/Button";
+import Icon from "@/components/ui/Icon";
+import { ERROR_MESSAGES } from "@/lib/constants";
+
+// Reusable field component to reduce repetition
+interface FieldProps {
+  label: string;
+  value: string | number | null;
+  unit?: string;
+}
+
+function Field({ label, value, unit }: FieldProps) {
+  const displayValue = value ? `${value}${unit ? ` ${unit}` : ""}` : "—";
+  
+  return (
+    <div>
+      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        {label}
+      </label>
+      <p className="text-lg text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 px-4 py-3 rounded-lg">
+        {displayValue}
+      </p>
+    </div>
+  );
+}
+
+// Status badge component with proper styling
+interface StatusBadgeProps {
+  status: string;
+}
+
+function StatusBadge({ status }: StatusBadgeProps) {
+  const statusClasses = {
+    "Compliant": "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+    "Non-Compliant": "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+  };
+  
+  const className = statusClasses[status as keyof typeof statusClasses] || 
+    "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+
+  return (
+    <span className={`px-4 py-3 rounded-lg text-lg font-semibold ${className}`}>
+      {status}
+    </span>
+  );
+}
+
+// Loading spinner component
+function LoadingSpinner() {
+  return (
+    <div className="flex items-center justify-center py-8">
+      <Icon name="loading" size={32} className="animate-spin text-indigo-600" />
+      <span className="ml-2 text-gray-600 dark:text-gray-400">Loading...</span>
+    </div>
+  );
+}
+
+// Not found component
+function NotFoundComponent({ onBack }: { onBack: () => void }) {
+  return (
+    <div className="max-w-2xl mx-auto text-center py-16">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
+        <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
+          <Icon name="warning" size={32} className="text-gray-400" />
+        </div>
+        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+          Component Not Found
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
+          {ERROR_MESSAGES.COMPONENT_NOT_FOUND}
+        </p>
+        <Button onClick={onBack} className="inline-flex items-center gap-2">
+          <Icon name="back" size={16} />
+          Back to Dashboard
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export default function DetailsPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { merged, loading, fetchMerged } = useComplianceStore();
 
+  // Fetch data on mount
   useEffect(() => {
-    // Always fetch data when component mounts to ensure we have the latest data
     fetchMerged();
   }, [fetchMerged]);
 
-  // Try both encoded and decoded versions of the ID
-  const decodedId = decodeURIComponent(params.id);
-  const component = merged?.components.find((c) => c.id === params.id || c.id === decodedId);
+  // Find component with proper ID handling
+  const component = useMemo(() => {
+    if (!merged?.components) return null;
+    
+    const id = params.id;
+    const decodedId = decodeURIComponent(id);
+    
+    return merged.components.find(c => c.id === id || c.id === decodedId);
+  }, [merged?.components, params.id]);
+
+  const handleBack = () => router.back();
 
   return (
     <ProtectedRoute>
       <main className="min-h-screen p-6 md:p-10 bg-white text-gray-900 dark:bg-neutral-950 dark:text-gray-100">
-        <button 
-          className="mb-6 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-          onClick={() => router.back()}
+        <Button 
+          variant="secondary"
+          className="mb-6 inline-flex items-center gap-2"
+          onClick={handleBack}
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
+          <Icon name="back" size={16} />
           Back to Dashboard
-        </button>
+        </Button>
+        
         <ErrorBoundary>
-          {component ? (
+          {loading ? (
+            <LoadingSpinner />
+          ) : component ? (
             <div className="max-w-4xl mx-auto">
               {/* Header */}
               <div className="mb-8">
-                <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{component.id}</h1>
+                <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                  {component.id}
+                </h1>
                 <p className="text-lg text-gray-600 dark:text-gray-400">Component Details</p>
               </div>
 
@@ -46,60 +137,24 @@ export default function DetailsPage() {
                   <div className="grid gap-6 md:grid-cols-2">
                     {/* Left Column */}
                     <div className="space-y-6">
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                          Material
-                        </label>
-                        <p className="text-lg text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 px-4 py-3 rounded-lg">
-                          {component.material || "—"}
-                        </p>
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                          Substance
-                        </label>
-                        <p className="text-lg text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 px-4 py-3 rounded-lg">
-                          {component.substance || "—"}
-                        </p>
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                          Mass
-                        </label>
-                        <p className="text-lg text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 px-4 py-3 rounded-lg">
-                          {component.mass}
-                        </p>
-                      </div>
+                      <Field label="Material" value={component.material} />
+                      <Field label="Substance" value={component.substance} />
+                      <Field label="Mass" value={component.mass} />
                     </div>
 
                     {/* Right Column */}
                     <div className="space-y-6">
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                          Threshold
-                        </label>
-                        <p className="text-lg text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 px-4 py-3 rounded-lg">
-                          {component.threshold_ppm ? `${component.threshold_ppm} ppm` : "—"}
-                        </p>
-                      </div>
+                      <Field 
+                        label="Threshold" 
+                        value={component.threshold_ppm} 
+                        unit="ppm" 
+                      />
                       
                       <div>
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
                           Compliance Status
                         </label>
-                        <div className="flex items-center">
-                          <span className={`px-4 py-3 rounded-lg text-lg font-semibold ${
-                            component.status === "Compliant" 
-                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" 
-                              : component.status === "Non-Compliant" 
-                                ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200" 
-                                : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
-                          }`}>
-                            {component.status}
-                          </span>
-                        </div>
+                        <StatusBadge status={component.status} />
                       </div>
                     </div>
                   </div>
@@ -108,42 +163,14 @@ export default function DetailsPage() {
                 {/* Footer */}
                 <div className="bg-gray-50 dark:bg-gray-800 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
                   <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <Icon name="info" size={16} />
                     Compliance history is mocked in this demo.
                   </div>
                 </div>
               </div>
             </div>
-          ) : loading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-              <span className="ml-2 text-gray-600 dark:text-gray-400">Loading...</span>
-            </div>
           ) : (
-            <div className="max-w-2xl mx-auto text-center py-16">
-              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.709M15 6.291A7.962 7.962 0 0012 4c-2.34 0-4.29 1.009-5.824 2.709" />
-                  </svg>
-                </div>
-                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">Component Not Found</h2>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  The component you're looking for doesn't exist or may have been removed.
-                </p>
-                <button
-                  onClick={() => router.back()}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                  Back to Dashboard
-                </button>
-              </div>
-            </div>
+            <NotFoundComponent onBack={handleBack} />
           )}
         </ErrorBoundary>
       </main>

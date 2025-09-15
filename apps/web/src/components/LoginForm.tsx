@@ -2,9 +2,74 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { loginSchema, type LoginFormData, logValidationError } from "@/lib/validation";
+import { DEMO_CREDENTIALS, ERROR_MESSAGES } from "@/lib/constants";
+import { extractErrorMessage, logError } from "@/lib/errorHandling";
+import Icon from "@/components/ui/Icon";
+
+// Form input component for consistent styling
+interface FormInputProps {
+  id: string;
+  label: string;
+  type: string;
+  placeholder: string;
+  error?: string;
+  disabled: boolean;
+  register: any;
+}
+
+const FormInput = ({ id, label, type, placeholder, error, disabled, register }: FormInputProps) => (
+  <div>
+    <label htmlFor={id} className="block text-sm font-medium text-slate-200 mb-2">
+      {label}
+    </label>
+    <input
+      id={id}
+      type={type}
+      className={`w-full px-4 py-3 bg-slate-700/50 border rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+        error ? "border-red-500" : "border-slate-600"
+      }`}
+      placeholder={placeholder}
+      disabled={disabled}
+      {...register(id)}
+    />
+    {error && <p className="mt-1 text-sm text-red-400">{error}</p>}
+  </div>
+);
+
+// Demo credentials component
+const DemoCredentials = () => (
+  <div className="bg-slate-700/30 rounded-lg p-4 mb-6 border border-slate-600/30">
+    <div className="flex items-center mb-2">
+      <Icon name="warning" size={16} className="text-yellow-400 mr-2" />
+      <span className="text-yellow-400 text-xs font-medium">Demo Credentials</span>
+    </div>
+    <div className="text-xs text-slate-300 space-y-1">
+      <div>Username: <span className="text-white font-mono">{DEMO_CREDENTIALS.USERNAME}</span></div>
+      <div>Password: <span className="text-white font-mono">{DEMO_CREDENTIALS.PASSWORD}</span></div>
+    </div>
+  </div>
+);
+
+// Error message component
+const ErrorMessage = ({ message }: { message: string }) => (
+  <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+    <div className="flex items-center">
+      <Icon name="warning" size={16} className="text-red-400 mr-2" />
+      <span className="text-red-400 text-sm">{message}</span>
+    </div>
+  </div>
+);
+
+// Loading spinner component
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center">
+    <Icon name="loading" size={20} className="animate-spin text-white mr-3" />
+    Signing in...
+  </div>
+);
 
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -17,13 +82,10 @@ export default function LoginForm() {
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
-    defaultValues: {
-      username: "",
-      password: "",
-    },
+    defaultValues: { username: "", password: "" },
   });
 
-  // Log validation errors when they occur
+  // Log validation errors for debugging
   useEffect(() => {
     Object.entries(errors).forEach(([field, error]) => {
       if (error?.message) {
@@ -32,122 +94,67 @@ export default function LoginForm() {
     });
   }, [errors]);
 
-  const onSubmit = async (data: LoginFormData) => {
+  // Handle form submission
+  const onSubmit = useCallback(async (data: LoginFormData) => {
     setError("");
     setIsLoading(true);
 
     try {
       await login(data.username, data.password);
-    } catch (err) {
-      console.error("[Login Error]", err);
-      setError("Invalid username or password");
+    } catch (error) {
+      logError("LoginForm.onSubmit", error);
+      setError(extractErrorMessage(error) || ERROR_MESSAGES.LOGIN_FAILED);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [login]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-black py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
-        {/* Main Card */}
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-2xl border border-slate-700/50 p-8">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
+              <Icon name="lock" size={32} className="text-white" />
             </div>
-            <h2 className="text-3xl font-bold text-white mb-2">
-              Welcome Back
-            </h2>
-            <p className="text-slate-300 text-sm">
-              Sign in to access the compliance dashboard
-            </p>
+            <h2 className="text-3xl font-bold text-white mb-2">Welcome Back</h2>
+            <p className="text-slate-300 text-sm">Sign in to access the compliance dashboard</p>
           </div>
 
-          {/* Demo Credentials */}
-          <div className="bg-slate-700/30 rounded-lg p-4 mb-6 border border-slate-600/30">
-            <div className="flex items-center mb-2">
-              <svg className="w-4 h-4 text-yellow-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              <span className="text-yellow-400 text-xs font-medium">Demo Credentials</span>
-            </div>
-            <div className="text-xs text-slate-300 space-y-1">
-              <div>Username: <span className="text-white font-mono">admin</span></div>
-              <div>Password: <span className="text-white font-mono">password</span></div>
-            </div>
-          </div>
+          <DemoCredentials />
 
           {/* Form */}
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div className="space-y-4">
-              <div>
-                <label htmlFor="username" className="block text-sm font-medium text-slate-200 mb-2">
-                  Username
-                </label>
-                <input
-                  id="username"
-                  type="text"
-                  className={`w-full px-4 py-3 bg-slate-700/50 border rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
-                    errors.username ? "border-red-500" : "border-slate-600"
-                  }`}
-                  placeholder="Enter your username"
-                  disabled={isLoading}
-                  {...register("username")}
-                />
-                {errors.username && (
-                  <p className="mt-1 text-sm text-red-400">{errors.username.message}</p>
-                )}
-              </div>
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-slate-200 mb-2">
-                  Password
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  className={`w-full px-4 py-3 bg-slate-700/50 border rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
-                    errors.password ? "border-red-500" : "border-slate-600"
-                  }`}
-                  placeholder="Enter your password"
-                  disabled={isLoading}
-                  {...register("password")}
-                />
-                {errors.password && (
-                  <p className="mt-1 text-sm text-red-400">{errors.password.message}</p>
-                )}
-              </div>
+              <FormInput
+                id="username"
+                label="Username"
+                type="text"
+                placeholder="Enter your username"
+                error={errors.username?.message}
+                disabled={isLoading}
+                register={register}
+              />
+              <FormInput
+                id="password"
+                label="Password"
+                type="password"
+                placeholder="Enter your password"
+                error={errors.password?.message}
+                disabled={isLoading}
+                register={register}
+              />
             </div>
 
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-                <div className="flex items-center">
-                  <svg className="w-4 h-4 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-red-400 text-sm">{error}</span>
-                </div>
-              </div>
-            )}
+            {error && <ErrorMessage message={error} />}
 
             <button
               type="submit"
               disabled={isLoading}
               className="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium py-3 px-6 rounded-lg border border-gray-600 hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Signing in...
-                </div>
-              ) : (
-                "Sign In"
-              )}
+              {isLoading ? <LoadingSpinner /> : "Sign In"}
             </button>
           </form>
         </div>

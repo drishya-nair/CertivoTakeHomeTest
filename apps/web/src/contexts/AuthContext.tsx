@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 import { api, setAuthToken } from "@/lib/api";
 
 interface User {
@@ -17,8 +17,20 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Storage keys for auth data
 const AUTH_TOKEN_KEY = "auth_token";
 const AUTH_USER_KEY = "auth_user";
+
+// Helper functions for localStorage operations
+const clearAuthData = () => {
+  localStorage.removeItem(AUTH_TOKEN_KEY);
+  localStorage.removeItem(AUTH_USER_KEY);
+};
+
+const storeAuthData = (token: string, user: User) => {
+  localStorage.setItem(AUTH_TOKEN_KEY, token);
+  localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -38,9 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch (error) {
         console.error("Failed to initialize auth:", error);
-        // Clear corrupted data
-        localStorage.removeItem(AUTH_TOKEN_KEY);
-        localStorage.removeItem(AUTH_USER_KEY);
+        clearAuthData();
       } finally {
         setIsLoading(false);
       }
@@ -49,39 +59,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initializeAuth();
   }, []);
 
-  const login = async (username: string, password: string) => {
+  // Login function with proper error handling
+  const login = useCallback(async (username: string, password: string) => {
     try {
       const response = await api.post("/auth/login", { username, password });
       const { token } = response.data;
+      const userData = { username };
 
-      // Store auth data
-      localStorage.setItem(AUTH_TOKEN_KEY, token);
-      localStorage.setItem(AUTH_USER_KEY, JSON.stringify({ username }));
-
-      // Update state
+      // Store auth data and update state
+      storeAuthData(token, userData);
       setAuthToken(token);
-      setUser({ username });
+      setUser(userData);
     } catch (error) {
-      // Clear any partial state
-      localStorage.removeItem(AUTH_TOKEN_KEY);
-      localStorage.removeItem(AUTH_USER_KEY);
+      // Clear any partial state on error
+      clearAuthData();
       setAuthToken(undefined);
       setUser(null);
       throw error;
     }
-  };
+  }, []);
 
-  const logout = () => {
-    // Clear stored data
-    localStorage.removeItem(AUTH_TOKEN_KEY);
-    localStorage.removeItem(AUTH_USER_KEY);
-
-    // Clear API token
+  // Logout function
+  const logout = useCallback(() => {
+    clearAuthData();
     setAuthToken(undefined);
-
-    // Clear state
     setUser(null);
-  };
+  }, []);
 
   const value: AuthContextType = {
     user,

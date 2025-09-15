@@ -1,16 +1,6 @@
 import { z } from "zod";
 
-/**
- * Frontend validation schemas using Zod
- * 
- * These schemas match the backend validation to ensure consistency
- * across the entire application.
- */
-
-/**
- * Login form validation schema
- * Matches the backend login validation exactly
- */
+// Validation schema for login form
 export const loginSchema = z.object({
   username: z
     .string()
@@ -22,15 +12,10 @@ export const loginSchema = z.object({
     .max(100, "Password must be 100 characters or less"),
 });
 
-/**
- * Type inference from login schema
- */
+// Type inference from schema
 export type LoginFormData = z.infer<typeof loginSchema>;
 
-/**
- * Simple validation error logging helper
- * Logs validation errors to console for debugging
- */
-export const logValidationError = (field: string, message: string, value?: any): void => {
+// Log validation errors for debugging
+export const logValidationError = (field: string, message: string, value?: unknown): void => {
   console.warn(`[Validation Error] ${field}: ${message}`, value ? { value } : '');
 };

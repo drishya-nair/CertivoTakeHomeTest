@@ -1,48 +1,35 @@
 "use client";
-
 import { MergedComponent } from "@certivo/shared-types";
+import { STATUS_SIZES } from "@/lib/constants";
 
 interface StatusIndicatorProps {
   status: MergedComponent["status"];
   size?: "sm" | "md" | "lg";
 }
 
+// Status configuration mapping for better performance and maintainability
+const STATUS_CONFIG = {
+  "Compliant": { color: "bg-green-500", text: "Compliant" },
+  "Non-Compliant": { color: "bg-red-500", text: "Non-Compliant" },
+  "Unknown": { color: "bg-gray-500", text: "Unknown" },
+} as const;
+
+// Base styles for status indicator
+const baseStyles = "rounded-md text-white font-medium inline-flex items-center justify-center min-w-7";
+
 export default function StatusIndicator({ 
   status, 
   size = "md"
 }: StatusIndicatorProps) {
-  const getStatusConfig = (status: MergedComponent["status"]) => {
-    switch (status) {
-      case "Compliant":
-        return {
-          color: "bg-green-500",
-          text: "Compliant",
-        };
-      case "Non-Compliant":
-        return {
-          color: "bg-red-500",
-          text: "Non-Compliant",
-        };
-      case "Unknown":
-      default:
-        return {
-          color: "bg-gray-500",
-          text: "Unknown",
-        };
-    }
-  };
-
-  const config = getStatusConfig(status);
-  const sizeClasses = {
-    sm: "px-2 py-0.5 text-xs",
-    md: "px-3 py-1 text-xs",
-    lg: "px-4 py-1.5 text-sm",
-  };
+  // Get status configuration with fallback for unknown statuses
+  const config = STATUS_CONFIG[status] || STATUS_CONFIG["Unknown"];
 
   return (
     <div
-      className={`${config.color} ${sizeClasses[size]} rounded-md text-white font-medium inline-flex items-center justify-center min-w-28`}
+      className={`${config.color} ${STATUS_SIZES[size]} ${baseStyles}`}
       title={status}
+      role="status"
+      aria-label={`Status: ${config.text}`}
     >
       {config.text}
     </div>
