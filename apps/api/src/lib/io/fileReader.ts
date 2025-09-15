@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
 import csv from "csv-parser";
-import { fileURLToPath } from "url";
 import { z } from "zod";
 
 import { BomData, ComplianceEntry } from "@certivo/shared-types";
@@ -10,12 +9,14 @@ import { createError } from "@/middleware/errorHandler";
 import logger from "../logger";
 
 // File system setup
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const dataDir = env.DATA_DIR
   ? path.resolve(env.DATA_DIR)
-  : path.resolve(__dirname, "..", "..", "..", "data");
+  : path.resolve(process.cwd(), "data");
+
+// Ensure data directory exists
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
 
 const bomPath = path.join(dataDir, "bom.json");
 const complianceCsvPath = path.join(dataDir, "compliance.csv");

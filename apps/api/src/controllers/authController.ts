@@ -67,7 +67,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
     const { username, password } = req.body as LoginRequest;
 
     if (!verifyCredentials(username, password)) {
-      throw createError("Invalid credentials", 401);
+      return next(createError("Invalid credentials", 401));
     }
 
     res.json({ token: generateToken(username) });
@@ -88,7 +88,7 @@ export async function refresh(req: Request, res: Response, next: NextFunction): 
     const authHeader = req.headers.authorization;
     
     if (!authHeader?.startsWith("Bearer ")) {
-      throw createError("Invalid token", 401);
+      return next(createError("Invalid token", 401));
     }
 
     const token = authHeader.substring(7);
@@ -97,7 +97,7 @@ export async function refresh(req: Request, res: Response, next: NextFunction): 
     res.json({ token: generateToken(decoded.sub) });
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
-      throw createError("Invalid token", 401);
+      return next(createError("Invalid token", 401));
     }
     next(error);
   }

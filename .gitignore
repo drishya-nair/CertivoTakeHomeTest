@@ -76,6 +76,9 @@ jspm_packages/
 tmp/
 temp/
 
+# Test data directories (generated during test runs)
+apps/api/test-data/
+
 # Logs
 logs
 *.log
