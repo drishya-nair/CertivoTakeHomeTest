@@ -2,7 +2,7 @@ import axios from "axios";
 import type { MergedComponent, MergedResponse } from "@certivo/shared-types";
 
 // API configuration
-export const API_BASE = "/api";
+export const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:4000";
 
 // Create axios instance with base configuration
 export const api = axios.create({

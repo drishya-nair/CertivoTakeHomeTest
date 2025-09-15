@@ -7,11 +7,12 @@ import {
   ArrowLeft, 
   Info, 
   Sun, 
-  Moon 
+  Moon,
+  RefreshCw
 } from "lucide-react";
 
 // Icon name type for better type safety
-type IconName = "search" | "back" | "warning" | "info" | "sun" | "moon" | "lock" | "loading";
+type IconName = "search" | "back" | "warning" | "info" | "sun" | "moon" | "lock" | "loading" | "refresh";
 
 interface IconProps {
   name: IconName;
@@ -29,6 +30,7 @@ const iconMap = {
   moon: Moon,
   lock: Lock,
   loading: Loader2,
+  refresh: RefreshCw,
 } as const;
 
 const Icon = forwardRef<SVGSVGElement, IconProps>(

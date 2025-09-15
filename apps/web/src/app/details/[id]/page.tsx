@@ -1,15 +1,18 @@
 "use client";
-import { useEffect, useMemo } from "react";
+
+import { useEffect, useMemo, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useComplianceStore } from "@/stores/complianceStore";
+import { useAuth } from "@/contexts/AuthContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Button from "@/components/ui/Button";
 import Icon from "@/components/ui/Icon";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { ERROR_MESSAGES } from "@/lib/constants";
+import type { MergedComponent } from "@certivo/shared-types";
 
-// Reusable field component to reduce repetition
+// Field component for displaying key-value pairs
 interface FieldProps {
   label: string;
   value: string | number | null;
@@ -31,7 +34,7 @@ function Field({ label, value, unit }: FieldProps) {
   );
 }
 
-// Status badge component with proper styling
+// Status badge component
 interface StatusBadgeProps {
   status: string;
 }
@@ -51,7 +54,6 @@ function StatusBadge({ status }: StatusBadgeProps) {
     </span>
   );
 }
-
 
 // Not found component
 function NotFoundComponent({ onBack }: { onBack: () => void }) {
@@ -76,27 +78,85 @@ function NotFoundComponent({ onBack }: { onBack: () => void }) {
   );
 }
 
+// Safely decode URI component with fallback
+const safeDecodeURIComponent = (id: string): string => {
+  try {
+    return decodeURIComponent(id);
+  } catch {
+    return id;
+  }
+};
+
 export default function DetailsPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { merged, loading, fetchMerged } = useComplianceStore();
+  const { merged, loading, fetchMerged, error } = useComplianceStore();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
 
-  // Fetch data on mount
+  // Fetch data when authenticated
   useEffect(() => {
-    fetchMerged();
-  }, [fetchMerged]);
+    if (isAuthenticated && !authLoading && !merged) {
+      fetchMerged();
+    }
+  }, [isAuthenticated, authLoading, merged, fetchMerged]);
 
-  // Find component with proper ID handling
-  const component = useMemo(() => {
-    if (!merged?.components) return null;
+  // Find component with ID validation
+  const component = useMemo((): MergedComponent | null => {
+    if (!merged?.components || loading || authLoading) return null;
     
     const id = params.id;
-    const decodedId = decodeURIComponent(id);
+    if (!id) return null;
     
-    return merged.components.find(c => c.id === id || c.id === decodedId);
-  }, [merged?.components, params.id]);
+    // Try multiple ID matching strategies
+    const searchIds = [id, safeDecodeURIComponent(id), encodeURIComponent(id)];
+    
+    for (const searchId of searchIds) {
+      const found = merged.components.find(c => c.id === searchId);
+      if (found) return found;
+    }
+    
+    return null;
+  }, [merged?.components, params.id, loading, authLoading]);
 
-  const handleBack = () => router.back();
+  const handleBack = useCallback(() => router.back(), [router]);
+
+  // Loading state
+  if (loading || authLoading) {
+    return (
+      <ProtectedRoute>
+        <main className="min-h-screen p-6 md:p-10 bg-white text-gray-900 dark:bg-neutral-950 dark:text-gray-100">
+          <div className="py-8">
+            <LoadingSpinner size={32} text="Loading..." className="text-indigo-600" />
+          </div>
+        </main>
+      </ProtectedRoute>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <ProtectedRoute>
+        <main className="min-h-screen p-6 md:p-10 bg-white text-gray-900 dark:bg-neutral-950 dark:text-gray-100">
+          <div className="max-w-2xl mx-auto text-center py-16">
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
+              <div className="w-16 h-16 mx-auto mb-4 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
+                <Icon name="warning" size={32} className="text-red-400" />
+              </div>
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+                Error Loading Data
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
+              <Button onClick={handleBack} className="inline-flex items-center gap-2">
+                <Icon name="back" size={16} />
+                Back to Dashboard
+              </Button>
+            </div>
+          </div>
+        </main>
+      </ProtectedRoute>
+    );
+  }
 
   return (
     <ProtectedRoute>
@@ -111,11 +171,7 @@ export default function DetailsPage() {
         </Button>
         
         <ErrorBoundary>
-          {loading ? (
-            <div className="py-8">
-              <LoadingSpinner size={32} text="Loading..." className="text-indigo-600" />
-            </div>
-          ) : component ? (
+          {component ? (
             <div className="max-w-4xl mx-auto">
               {/* Header */}
               <div className="mb-8">
