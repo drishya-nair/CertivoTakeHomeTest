@@ -3,11 +3,7 @@
  * Provides consistent error handling patterns across the application
  */
 
-export interface ApiError {
-  message: string;
-  status?: number;
-  code?: string;
-}
+import type { ApiError } from "@certivo/shared-types";
 
 // Default error message for unknown errors
 const DEFAULT_ERROR_MESSAGE = 'An unexpected error occurred';

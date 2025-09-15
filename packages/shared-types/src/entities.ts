@@ -44,6 +44,8 @@ export interface LoginRequest {
 
 export interface ApiError {
   message: string;
+  status?: number;
+  code?: string;
   errors?: Array<{
     field: string;
     message: string;

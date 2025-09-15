@@ -16,10 +16,12 @@ export function ensureDataDirForTests(): string {
   return testDataDir;
 }
 
-// Test to ensure this file is recognized as a test file
+// Simple test to ensure the utility function works
 describe("dataDir utility", () => {
-  it("should export ensureDataDirForTests function", () => {
-    expect(typeof ensureDataDirForTests).toBe("function");
+  it("should create test data directory and set environment variable", () => {
+    const testDir = ensureDataDirForTests();
+    expect(testDir).toContain("test-data");
+    expect(process.env.DATA_DIR).toBe(testDir);
   });
 });
 

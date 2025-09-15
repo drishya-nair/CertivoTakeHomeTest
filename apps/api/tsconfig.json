@@ -12,13 +12,7 @@
     "types": ["node", "jest"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@/config/*": ["src/config/*"],
-      "@/controllers/*": ["src/controllers/*"],
-      "@/middleware/*": ["src/middleware/*"],
-      "@/routes/*": ["src/routes/*"],
-      "@/services/*": ["src/services/*"],
-      "@/lib/*": ["src/lib/*"]
+      "@/*": ["src/*"]
     }
   },
   "include": ["src", "__tests__"],
