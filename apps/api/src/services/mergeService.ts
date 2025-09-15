@@ -92,7 +92,7 @@ export class MergeService {
           mass,
           threshold_ppm: null,
           status: "Unknown",
-          material: part.material,
+          material: part.material || "Unknown",
         };
       }
 
@@ -104,7 +104,7 @@ export class MergeService {
         mass,
         threshold_ppm: entry.threshold_ppm,
         status: isCompliant ? "Compliant" : "Non-Compliant",
-        material: part.material,
+        material: part.material || "Unknown",
       };
     });
 

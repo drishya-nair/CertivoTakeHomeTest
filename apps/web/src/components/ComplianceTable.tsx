@@ -1,4 +1,5 @@
 import type { MergedComponent } from "@certivo/shared-types";
+import { useRouter } from "next/navigation";
 import StatusIndicator from "./StatusIndicator";
 
 interface ComplianceTableProps {
@@ -8,8 +9,14 @@ interface ComplianceTableProps {
 }
 
 export default function ComplianceTable({ rows, loading, error }: ComplianceTableProps) {
+  const router = useRouter();
+  
   if (error) return <div className="text-red-600">{error}</div>;
   if (loading) return <div className="animate-pulse text-sm text-gray-500">Loading…</div>;
+  
+  const handleRowClick = (componentId: string) => {
+    router.push(`/details/${encodeURIComponent(componentId)}`);
+  };
   
   return (
     <div className="overflow-x-auto rounded border border-gray-200 dark:border-neutral-800">
@@ -26,7 +33,7 @@ export default function ComplianceTable({ rows, loading, error }: ComplianceTabl
         </thead>
         <tbody className="divide-y divide-gray-200 dark:divide-neutral-800">
           {rows.map((r) => (
-            <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-neutral-900 cursor-pointer" onClick={() => window.location.assign(`/details/${encodeURIComponent(r.id)}`)}>
+            <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-neutral-900 cursor-pointer" onClick={() => handleRowClick(r.id)}>
               <Td>{r.id}</Td>
               <Td>{r.material}</Td>
               <Td>{r.substance ?? "—"}</Td>

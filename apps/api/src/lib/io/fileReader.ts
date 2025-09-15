@@ -27,6 +27,7 @@ const BomDataSchema = z.object({
   parts: z.array(z.object({
     part_number: z.string().min(1),
     weight_g: z.number().positive(),
+    material: z.string().optional(),
     description: z.string().optional(),
   })),
 });
