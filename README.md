@@ -141,6 +141,7 @@ The project includes comprehensive testing:
 - Backend: Unit tests for controllers, services, and middleware using Jest
 - Frontend: Component tests using Vitest and React Testing Library
 - Run tests (from root directory, api, or web): `npm test`
+- All test cases passed in the most recent check. If you're noticing test cases not passing, please check to see if you're in the right directory and that you've installed everything needed for the tests to run.
 
 ## Technology Stack
 
