@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { api, setAuthToken, API_BASE } from "@/lib/api";
 import type { MergedResponse } from "@certivo/shared-types";
-import { createSocket } from "@/utils/socket";
 
 type State = {
   token?: string;
