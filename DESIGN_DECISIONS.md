@@ -72,8 +72,9 @@ This document outlines the key design decisions made during the development of t
 **Why**: This is a small assessment project where the primary goal is to demonstrate authentication flow, JWT implementation, and security patterns rather than production-ready credential management. Hardcoded credentials eliminate database setup complexity and allow evaluators to immediately test the authentication system without additional infrastructure requirements.
 
 **Implementation**:
-- User credentials stored as hardcoded objects in `AuthController`
-- Password hashing using SHA-256 with salt for demonstration purposes
+- User credentials stored in environment variables (`DEMO_USER`, `DEMO_PASS`)
+- Default values hardcoded in `env.ts` for immediate testing
+- Password hashing using SHA-256 with constant-time comparison for security
 - No database persistence or user management features
 - Simple credential lookup for authentication
 - Clear documentation of production security requirements
