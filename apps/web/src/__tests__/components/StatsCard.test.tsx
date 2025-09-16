@@ -1,5 +1,4 @@
 import { describe, it, expect } from 'vitest'
-import StatsCard from '@/components/StatsCard'
 
 describe('StatsCard Component Logic', () => {
   it('should handle empty stats', () => {
