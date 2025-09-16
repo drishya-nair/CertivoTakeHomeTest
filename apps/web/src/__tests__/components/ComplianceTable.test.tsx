@@ -20,7 +20,7 @@ describe('ComplianceTable Component Logic', () => {
   })
 
   it('should handle empty data array', () => {
-    const emptyData: any[] = []
+    const emptyData: Array<{ id: string; name: string; status: 'Compliant' | 'Non-Compliant' | 'Unknown' }> = []
     expect(emptyData).toHaveLength(0)
   })
 

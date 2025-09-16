@@ -33,7 +33,10 @@ describe('LoginForm Component Logic', () => {
   })
 
   it('should handle onSubmit callback', () => {
-    const submitHandler = (data: { username: string; password: string }) => {}
+    const submitHandler = (data: { username: string; password: string }) => {
+      expect(data.username).toBeDefined()
+      expect(data.password).toBeDefined()
+    }
     const propsWithSubmit = {
       onSubmit: submitHandler
     }

@@ -33,6 +33,8 @@ describe('AuthContext Logic', () => {
 
   it('should handle login function', () => {
     const loginFunction = async (username: string, password: string) => {
+      expect(username).toBeDefined()
+      expect(password).toBeDefined()
       return { success: true, token: 'mock-token' }
     }
     

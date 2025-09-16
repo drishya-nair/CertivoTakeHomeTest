@@ -89,11 +89,21 @@ describe('ComplianceStore Logic', () => {
 
   it('should handle store actions', () => {
     const storeActions = {
-      setData: (data: any[]) => {},
-      setStats: (stats: any) => {},
-      setLoading: (loading: boolean) => {},
-      setError: (error: string | null) => {},
-      setSearchTerm: (term: string) => {}
+      setData: (data: Array<{ id: string; name: string; status: string }>) => {
+        expect(Array.isArray(data)).toBe(true)
+      },
+      setStats: (stats: { total: number; compliant: number; non: number; unknown: number }) => {
+        expect(typeof stats.total).toBe('number')
+      },
+      setLoading: (loading: boolean) => {
+        expect(typeof loading).toBe('boolean')
+      },
+      setError: (error: string | null) => {
+        expect(error === null || typeof error === 'string').toBe(true)
+      },
+      setSearchTerm: (term: string) => {
+        expect(typeof term).toBe('string')
+      }
     }
     
     expect(typeof storeActions.setData).toBe('function')

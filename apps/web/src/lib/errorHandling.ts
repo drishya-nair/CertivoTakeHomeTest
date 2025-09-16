@@ -46,7 +46,7 @@ export function createError(message: string, status?: number, code?: string): Ap
 /**
  * Logs errors consistently with context
  */
-export function logError(context: string, error: unknown, additionalInfo?: Record<string, any>): void {
+export function logError(context: string, error: unknown, additionalInfo?: Record<string, unknown>): void {
   console.error(`[${context}]`, {
     error: extractErrorMessage(error),
     originalError: error,

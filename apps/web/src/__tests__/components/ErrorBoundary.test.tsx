@@ -25,7 +25,9 @@ describe('ErrorBoundary Component Logic', () => {
   })
 
   it('should handle onError callback', () => {
-    const errorHandler = (error: Error) => console.log(error)
+    const errorHandler = (error: Error) => {
+      expect(error).toBeInstanceOf(Error)
+    }
     const propsWithErrorHandler = {
       children: 'Test',
       onError: errorHandler
@@ -54,6 +56,7 @@ describe('ErrorBoundary Component Logic', () => {
     
     expect(errorState.hasError).toBe(true)
     expect(errorState.error).toBeInstanceOf(Error)
+    expect(errorState.error.message).toBe('Test error')
   })
 
   it('should handle no error state', () => {

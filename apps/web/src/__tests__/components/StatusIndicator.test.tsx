@@ -40,7 +40,7 @@ describe('StatusIndicator Component Logic', () => {
   })
 
   it('should handle unknown status gracefully', () => {
-    const unknownStatus = "InvalidStatus" as any
+    const unknownStatus = "InvalidStatus" as string
     const statusConfig: Record<string, { color: string; text: string }> = {
       "Compliant": { color: "bg-green-500", text: "Compliant" },
       "Non-Compliant": { color: "bg-red-500", text: "Non-Compliant" },
