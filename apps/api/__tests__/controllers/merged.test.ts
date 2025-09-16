@@ -14,7 +14,7 @@ describe("Merged Controller", () => {
 
   beforeAll(async () => {
     // Ensure test data directory exists
-    await ensureDataDirForTests();
+    ensureDataDirForTests();
     
     // Login to get auth token
     const response = await request(app)

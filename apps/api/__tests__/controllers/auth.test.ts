@@ -7,7 +7,7 @@ const dataDir = ensureDataDirForTests();
 describe("Authentication Controller", () => {
   beforeAll(async () => {
     // Ensure test data directory exists
-    await ensureDataDirForTests();
+    ensureDataDirForTests();
   });
 
   describe("POST /auth/login", () => {

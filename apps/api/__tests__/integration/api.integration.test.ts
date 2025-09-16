@@ -114,7 +114,6 @@ describe("API Integration Tests", () => {
         .set("Authorization", `Bearer ${authToken}`);
 
       expect(complianceResponse.status).toBe(200);
-      const complianceData = complianceResponse.body;
 
       // Get merged data
       const mergedResponse = await request(app)
