@@ -138,6 +138,19 @@ This document outlines the key design decisions made during the development of t
 - Clear separation between API and frontend concerns
 - Easy to add additional apps or packages in the future
 
+### API Endpoint Naming: `/compliance` vs `/documents`
+
+**Decision**: Use `/compliance` as the primary endpoint instead of the more generic `/documents`.
+
+**Why**: The endpoint name (and related files) should clearly communicate its purpose and the type of data it returns. While "documents" is generic and could refer to any type of document, "compliance" specifically indicates that this endpoint deals with compliance-related data. This makes the API more self-documenting and helps developers understand what to expect from the endpoint without needing to read extensive documentation.
+
+**Benefits**:
+- Self-documenting API that clearly communicates purpose
+- Easier for frontend developers to understand endpoint functionality
+- Better alignment with business domain terminology
+- Reduces cognitive load when working with the API
+- More intuitive for future API consumers
+
 ### Service-Oriented Backend Architecture
 
 **Decision**: Organize backend code into controllers, services, and middleware with clear separation of concerns.
