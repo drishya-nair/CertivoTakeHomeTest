@@ -83,9 +83,8 @@ export default function ComplianceChart({ compliant, non, unknown }: ComplianceC
   }, [updateChart]);
 
   return (
-    <div 
+    <section 
       className="rounded border border-gray-200 dark:border-neutral-800 p-4" 
-      role="region" 
       aria-label="Compliance chart"
     >
       <h2 className="font-medium mb-2">Compliance Chart</h2>
@@ -93,7 +92,7 @@ export default function ComplianceChart({ compliant, non, unknown }: ComplianceC
         ref={canvasRef} 
         aria-label="Compliance doughnut chart showing distribution of compliant, non-compliant, and unknown components" 
       />
-    </div>
+    </section>
   );
 }
 

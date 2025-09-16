@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback, useMemo } from "react";
 import { api, setAuthToken } from "@/lib/api";
 
 interface User {
@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       // Clear any partial state on error
       clearAuthData();
-      setAuthToken(undefined);
+      setAuthToken();
       setUser(null);
       throw error;
     }
@@ -82,17 +82,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Logout function
   const logout = useCallback(() => {
     clearAuthData();
-    setAuthToken(undefined);
+    setAuthToken();
     setUser(null);
   }, []);
 
-  const value: AuthContextType = {
+  const value: AuthContextType = useMemo(() => ({
     user,
     isLoading,
     login,
     logout,
     isAuthenticated: !!user,
-  };
+  }), [user, isLoading, login, logout]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

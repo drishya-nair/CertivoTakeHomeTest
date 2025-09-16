@@ -20,7 +20,11 @@ interface FieldProps {
 }
 
 function Field({ label, value, unit }: FieldProps) {
-  const displayValue = value ? `${value}${unit ? ` ${unit}` : ""}` : "—";
+  const displayValue = (() => {
+    if (!value) return "—";
+    const unitSuffix = unit ? ` ${unit}` : "";
+    return `${value}${unitSuffix}`;
+  })();
   
   return (
     <div>
@@ -201,9 +205,9 @@ export default function DetailsPage() {
                       />
                       
                       <div>
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
+                        <h4 className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
                           Compliance Status
-                        </label>
+                        </h4>
                         <StatusBadge status={component.status} />
                       </div>
                     </div>

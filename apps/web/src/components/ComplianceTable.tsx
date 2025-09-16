@@ -62,7 +62,6 @@ export default function ComplianceTable({ rows, loading, error }: ComplianceTabl
               onClick={() => handleRowClick(row.id)}
               onKeyDown={(e) => handleKeyDown(e, row.id)}
               tabIndex={0}
-              role="button"
               aria-label={`View details for component ${row.id}`}
             >
               <td className="px-4 py-2 text-gray-800 dark:text-gray-200">{row.id}</td>

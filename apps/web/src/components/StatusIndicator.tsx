@@ -25,13 +25,12 @@ export default function StatusIndicator({
   const config = STATUS_CONFIG[status] || STATUS_CONFIG["Unknown"];
 
   return (
-    <div
+    <output
       className={`${config.color} ${STATUS_SIZES[size]} ${baseStyles}`}
       title={status}
-      role="status"
       aria-label={`Status: ${config.text}`}
     >
       {config.text}
-    </div>
+    </output>
   );
 }

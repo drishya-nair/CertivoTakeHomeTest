@@ -35,18 +35,17 @@ export default function StatsCard({ stats }: StatsCardProps) {
   }), [stats.compliant, stats.non, stats.unknown, stats.total]);
   
   return (
-    <div 
+    <section 
       className="rounded border border-gray-200 dark:border-neutral-800 p-4" 
-      role="region" 
       aria-label="Compliance summary statistics"
     >
       <h2 className="font-medium mb-2">Compliance Summary</h2>
-      <ul className="space-y-1 text-sm" role="list">
+      <ul className="space-y-1 text-sm">
         <li>Total: {stats.total}</li>
         <StatItem label="Compliant" value={stats.compliant} percentage={percentages.compliant} />
         <StatItem label="Non-Compliant" value={stats.non} percentage={percentages.non} />
         <StatItem label="Unknown" value={stats.unknown} percentage={percentages.unknown} />
       </ul>
-    </div>
+    </section>
   );
 }
